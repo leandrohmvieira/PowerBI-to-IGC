@@ -1,9 +1,10 @@
-SELECT	CT.[Path]
-        ,CT.[Type]
-		,cc.ContentType
-        ,CONVERT(varbinary(max), cc.[Content]) AS BinaryContent
-FROM dbo.[Catalog] AS CT
-		LEFT OUTER JOIN dbo.CatalogItemExtendedContent cc
-			ON ct.ItemID = cc.ItemId
-WHERE CT.[Type] IN (13) -- this idicates a PBI report
-	AND cc.ContentType = 'CatalogItem';
+--Query that returns all reports on server (load to memory, beware!)
+SELECT CT.[path],
+       CT.[type],
+       cc.contenttype,
+       CONVERT(VARBINARY(max), cc.[content]) AS BinaryContent
+FROM   dbo.[catalog] AS CT
+       LEFT OUTER JOIN dbo.catalogitemextendedcontent cc
+                    ON ct.itemid = cc.itemid
+WHERE  CT.[type] IN ( 13 ) -- this idicates a PBI report
+       AND cc.contenttype = 'CatalogItem';
