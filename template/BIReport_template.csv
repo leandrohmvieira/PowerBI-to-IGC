@@ -1,0 +1,49 @@
++++ BI Server - begin +++
+Name,Description
+BI Server,BI Server Description
++++ BI Server - end +++
+
++++ BI Report - begin +++
+Name,Server,Folder,Description
+My Report,BI Server,Public Folder/EWS/My Reports,My Report Description
++++ BI Report - end +++
+
+
++++ BI Query - begin +++
+Name,Report,Description
+Query1,My Report<BI Server/Public Folder/EWS/My Reports>,Query1 Description
++++ BI Query - end +++
+
+
++++ BI Query Member - begin +++
+#REMARK- this asset is displayed as BI Report Query Item,,,,
+Name,Query,Report,Expression,Description
+col1,Query1,My Report<BI Server/Public Folder/EWS/My Reports>,Expression,Description
+col2,Query1,My Report<BI Server/Public Folder/EWS/My Reports>,Expression,Description
++++ BI Query Member - end +++
+
+
++++ BI Model - begin +++
+Name,Server,Folder,Description
+BI Model,BI Server,Public Folder/EWS/My Reports,BI Model Description
++++ BI Model - end +++
+
+
++++ BI Collection - begin +++
+Name,Model,Description
+Collection,BI Model<BI Server/Public Folder/EWS/My Reports>,Collection Description
++++ BI Collection - end +++
+
+
++++ BI Collection Member - begin +++
+Name,Collection,Model,Description,Data Type,Expression
+1,Collection,BI Model<BI Server/Public Folder/EWS/My Reports>,Description,Char,Expression
+2,Collection,BI Model<BI Server/Public Folder/EWS/My Reports>,Description,Char,Expression
++++ BI Collection Member - end +++
+
+
++++ BI Relationship - begin +++
+Query Member,Collection Member,Database Field
+My Report<BI Server/Public Folder/EWS/My Reports>.Query1.col1,BI Model<BI Server/Public Folder/EWS/My Reports>.Collection.1,My Host.My Database<dbms=Relational::instance="DB2">.My Schema.My Table.Column1
+My Report<BI Server/Public Folder/EWS/My Reports>.Query1.col2,BI Model<BI Server/Public Folder/EWS/My Reports>.Collection.2,My Host.My Database<dbms=Relational::instance="DB2">.My Schema.My Table.Column2
++++ BI Relationship - end +++

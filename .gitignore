@@ -1,1 +1,2 @@
-*.env
+.env
+output/bi_reports.csv
