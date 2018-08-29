@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 """
 Very Ugly Script that ingest PowerBI Report Server files, parse the metadata undelying it
-and finally, insert into OpenIGC API 
+and finally, insert into OpenIGC API
 """
 
 import pyodbc
 import pandas as pd
 import zipfile
 
+import os
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+
 #Connect to PowerBI Report Server
-server = '172.17.61.118' 
-database = 'PBI_ReportServer' 
-username = 'SQSIIS02' 
-password = 'e08ihgas' 
+server = os.getenv("SERVER")
+database = os.getenv("PBI_ReportServer")
+username = os.getenv("SQSIIS02")
+password = os.getenv("e08ihgas")
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 
-
+server
 
 #Query that returns all reports on server (load to memory, beware!)
 content_query = 'SELECT	CT.[Path]\
@@ -50,9 +54,9 @@ zip_ref.close()
 
 
 
-#cursor.execute("SELECT Name,Content from dbo.Catalog") 
-#row = cursor.fetchone() 
+#cursor.execute("SELECT Name,Content from dbo.Catalog")
+#row = cursor.fetchone()
 
-#while row: 
+#while row:
 #    print(row)
 #    row = cursor.fetchone()
