@@ -35,13 +35,19 @@ output.write("Name,Description\n")
 output.write('server'+",\n")
 output.write("+++ BI Server - end +++\n\n")
 
+#defining a index of columns to fill the file
+new_index = ['name','server','folder','description']
+
 #Write PowerBI Reports
 output.write("+++ BI Report - begin +++\n")
 output.write("Name,Server,Folder,Description\n")
-reports.to_csv(output,header=False,index=False)
+reports.to_csv(output,header=False,index=False,columns=reports.reindex(new_index)) #using reindex due to a future warning
 output.write("+++ BI Report - end +++")
-
 output.close()
+
+reportid = reports['itemid'][0]
+
+
 
 
 #writing pbix file onto disk - delayed to next release

@@ -1,6 +1,7 @@
 -- Bring all reports from PBI server
 SELECT
-	Name,
+	ItemID as itemid,
+	Name as name,
 	'server' as server,
 	left([Path],LEN([Path])-LEN(Name)-1) as folder,
 	'No description' as description
