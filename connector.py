@@ -39,12 +39,7 @@ output.write("+++ BI Server - end +++\n\n")
 output.write("+++ BI Report - begin +++\n")
 output.write("Name,Server,Folder,Description\n")
 reports.to_csv(output,header=False,index=False)
-#for row in df:
-    #TODO write report query on file
-    #output.write("Name,"+server+",Folder,Description")
 output.write("+++ BI Report - end +++")
-
-
 
 output.close()
 
