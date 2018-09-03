@@ -35,24 +35,30 @@ output.write("Name,Description\n")
 output.write('server'+",\n")
 output.write("+++ BI Server - end +++\n\n")
 
-#defining a index of columns to fill the file
-new_index = ['name','server','folder','description']
+#defining a range of columns to fill the file
+report_columns = ['name','server','folder','description']
 
 #Write PowerBI Reports
 output.write("+++ BI Report - begin +++\n")
 output.write("Name,Server,Folder,Description\n")
-reports.to_csv(output,header=False,index=False,columns=reports.reindex(new_index)) #using reindex due to a future warning
+reports[report_columns].to_csv(output,header=False,index=False) #using reindex due to a future warning
 output.write("+++ BI Report - end +++")
 output.close()
 
+
+#get report id from the first report (dev purposes)
 reportid = reports['itemid'][0]
-
-
-
+report_name = reports['name'][0]
+#open report id query
+report_content_query = open('select_report_content.sql', 'r')
+#execute the query with positional parameter: pyodbc does not support named parameters(today, 03/sep/2018)
+report_content = pd.read_sql_query(report_content_query.read(),cnxn,params=[reportid])
+#peeking the query result
+report_content.head()
 
 #writing pbix file onto disk - delayed to next release
-#with open("pbiextracted.pbix", "wb") as fh:
-#    fh.write(result['Content'][0])
+with open("input/"+report_name+".pbix", "wb") as fh:
+    fh.write(report_content['BinaryContent'][0])
 
 
 #cursor = cnxn.cursor()
