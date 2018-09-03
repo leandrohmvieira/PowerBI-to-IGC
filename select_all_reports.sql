@@ -8,8 +8,3 @@ FROM
 	dbo.[catalog]
 where
 	[Type] = 13;
-
-select
-	'banana' as penis
-from
-	dbo.[Catalog];
