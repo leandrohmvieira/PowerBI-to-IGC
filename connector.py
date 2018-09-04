@@ -21,7 +21,7 @@ username = os.getenv("USER")
 password = os.getenv("PASSWORD")
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 
-#Load query result into pandas dataframe, because i want to
+#Load query result into pandas dataframe, because i feel like it
 all_reports = open('select_all_reports.sql', 'r')
 reports = pd.read_sql_query(all_reports.read(), cnxn)
 #result.head()
@@ -56,14 +56,18 @@ report_content = pd.read_sql_query(report_content_query.read(),cnxn,params=[repo
 #peeking the query result
 report_content.head()
 
+input_filename = "input/"+report_name+".pbix"
 #writing pbix file onto disk - delayed to next release
-with open("input/"+report_name+".pbix", "wb") as fh:
+with open(input_filename, "wb") as fh:
     fh.write(report_content['BinaryContent'][0])
 
-
-#cursor = cnxn.cursor()
-
-#Uncompressing pbix file(the cat's jump is here, hehehe) - delayed to next release
-#zip_ref = zipfile.ZipFile('pbiextracted.pbix', 'r')
-#zip_ref.extractall('pbiextracted')
-#zip_ref.close()
+#Unzipping pbix file(the cat's jump is here, hehehe)
+zip_ref = zipfile.ZipFile(input_filename, 'r')
+zip_ref.extractall('input/temp')
+zip_ref.close()
+#Unzipping the DataMashup file (yeah, PowerBI is a double zipped file)
+mashup_file = 'input/temp/DataMashup.zip'
+zip_ref = zipfile.ZipFile(mashup_file, 'r')
+zip_ref.namelist()
+zip_ref.infolist()
+zip_ref.close()

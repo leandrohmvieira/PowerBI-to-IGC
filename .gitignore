@@ -1,3 +1,4 @@
 .env
 output/bi_reports.csv
 input/*.pbix
+input/temp/*
