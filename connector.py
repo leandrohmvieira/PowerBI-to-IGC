@@ -8,6 +8,7 @@ import pyodbc
 import pandas as pd
 import zipfile
 import subprocess
+import re
 
 #get environment variables from .env file
 import os
@@ -47,8 +48,8 @@ output.close()
 
 
 #get report id from the first report (dev purposes)
-reportid = reports['itemid'][0]
-report_name = reports['name'][0]
+reportid = reports['itemid'][1]
+report_name = reports['name'][1]
 #open report id query
 report_content_query = open('select_report_content.sql', 'r')
 #execute the query with positional parameter: pyodbc does not support named parameters(today, 03/sep/2018)
@@ -70,16 +71,29 @@ mashup_file = 'input/temp/DataMashup'
 sevenzip_path = os.getenv("7ZIP")
 source = mashup_file
 directory = '-oinput/temp' ## TODO: fix this -o thing
-#subprocess.run(sevenzip_path+' '+ source +' -o'+directory,std)
 
-#sevenzip_path+' '+ source +' -o'+directory
-
+#build and execute a 7zip call to unzip the DataMashup file
 cmd = [sevenzip_path, 'e', source , directory,'-aoa']
-
 sp = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+#to get the command output, use sp.communicate()
+#sp.communicate()
 ## TODO: Find a way to remove this 3rd party process dependence
 
-#sp.communicate()
+
+
+#now, time to parse the Section1.m file
+
+regex_metadata = re.compile('(\".*?\")')
+section_script = open('input/temp/Section1.m', 'r').read()
+
+metadata = regex_metadata.findall(section_script)
+
+metadata[2]
+
+
+
+
+
 
 
 
