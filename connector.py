@@ -48,8 +48,8 @@ output.close()
 
 
 #get report id from the first report (dev purposes)
-reportid = reports['itemid'][1]
-report_name = reports['name'][1]
+reportid = reports['itemid'][6]
+report_name = reports['name'][6]
 #open report id query
 report_content_query = open('select_report_content.sql', 'r')
 #execute the query with positional parameter: pyodbc does not support named parameters(today, 03/sep/2018)
@@ -79,8 +79,6 @@ sp = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 #sp.communicate()
 ## TODO: Find a way to remove this 3rd party process dependence
 
-
-
 #now, time to parse the Section1.m file
 
 regex_metadata = re.compile('(\".*?\")')
@@ -88,15 +86,29 @@ section_script = open('input/temp/Section1.m', 'r').read()
 
 metadata = regex_metadata.findall(section_script)
 
-metadata[2]
+#writing database csv file
 
+output = open("output/database_sources.csv","w",encoding='utf-8')
 
+#Write the database Host
+output.write("+++ Host - begin +++\n")
+output.write("Name,Description\n")
+output.write(metadata[0]+",\n")
+output.write("+++ Host - end +++\n\n")
 
+#write database definitions
+output.write("+++ Database - begin +++\n")
+output.write("Name,Host,Description,Vendor,Version,Instance,Location,DBMS\n")
+## TODO: build a pandas dataframe with database definitions, or any another tabular writing to the file
+#reports[report_columns].to_csv(output,header=False,index=False) #using reindex due to a future warning
+output.write("+++ Database - end +++")
+output.close()
 
+#write schema definitions
+output.write("+++ Schema - begin +++\n")
+output.write("Name,Host,Database,Description\n")
+## TODO: build a pandas dataframe with schema definitions, or any another tabular writing to the file
+#reports[report_columns].to_csv(output,header=False,index=False) #using reindex due to a future warning
+output.write("+++ Schema - end +++")
 
-
-
-
-#7z C:\Users\c1296985\Desktop\PowerBI-to-IGC\input\temp\DataMashup.zip -o
-
-#7z e C:\Users\c1296985\Desktop\PowerBI-to-IGC\input\temp\DataMashup -oC:\Users\c1296985\Desktop\PowerBI-to-IGC\input
+## TODO: evaluate if its possible to bring table level metadata to the dance floor
