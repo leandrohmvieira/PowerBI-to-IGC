@@ -7,7 +7,7 @@ and finally, insert into OpenIGC API
 import pyodbc
 import pandas as pd
 import zipfile
-
+import subprocess
 
 #get environment variables from .env file
 import os
@@ -65,9 +65,24 @@ with open(input_filename, "wb") as fh:
 zip_ref = zipfile.ZipFile(input_filename, 'r')
 zip_ref.extractall('input/temp')
 zip_ref.close()
-#Unzipping the DataMashup file (yeah, PowerBI is a double zipped file)
-mashup_file = 'input/temp/DataMashup.zip'
-zip_ref = zipfile.ZipFile(mashup_file, 'r')
-zip_ref.namelist()
-zip_ref.infolist()
-zip_ref.close()
+#Unzipping the DataMashup file (yeah, PowerBI is all about zipped files)
+mashup_file = 'input/temp/DataMashup'
+sevenzip_path = os.getenv("7ZIP")
+source = mashup_file
+directory = '-oinput/temp'
+#subprocess.run(sevenzip_path+' '+ source +' -o '+directory,std)
+
+#sevenzip_path+' '+ source +' -o'+directory
+
+cmd = [sevenzip_path, 'e', source , directory,'-aoa']
+
+sp = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+## TODO: Find a way to remove this 3rd party process dependence
+
+#sp.communicate()
+
+
+
+#7z C:\Users\c1296985\Desktop\PowerBI-to-IGC\input\temp\DataMashup.zip -o
+
+#7z e C:\Users\c1296985\Desktop\PowerBI-to-IGC\input\temp\DataMashup -oC:\Users\c1296985\Desktop\PowerBI-to-IGC\input
