@@ -69,8 +69,8 @@ zip_ref.close()
 mashup_file = 'input/temp/DataMashup'
 sevenzip_path = os.getenv("7ZIP")
 source = mashup_file
-directory = '-oinput/temp'
-#subprocess.run(sevenzip_path+' '+ source +' -o '+directory,std)
+directory = '-oinput/temp' ## TODO: fix this -o thing
+#subprocess.run(sevenzip_path+' '+ source +' -o'+directory,std)
 
 #sevenzip_path+' '+ source +' -o'+directory
 
