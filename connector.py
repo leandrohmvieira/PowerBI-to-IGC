@@ -24,7 +24,7 @@ cnxn = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+server+';
 
 #Load query result into pandas dataframe, because i feel like it
 all_reports = open('select_all_reports.sql', 'r')
-reports = pd.read_sql_query(all_reports.read(), cnxn)
+reports = pd.read_sql_query(all_reports.read(), cnxn) # TODO: move this to powerapi.py
 #result.head()
 
 #writing CSV compatible output file
@@ -46,6 +46,10 @@ reports[report_columns].to_csv(output,header=False,index=False) #using reindex d
 output.write("+++ BI Report - end +++")
 output.close()
 
+#getting ready for a massive pbix slaughter
+
+#Downloader
+report_content_query = open('select_report_content.sql', 'r').read()
 
 #get report id from the first report (dev purposes)
 reportid = reports['itemid'][6]
@@ -57,7 +61,7 @@ report_content = pd.read_sql_query(report_content_query.read(),cnxn,params=[repo
 #peeking the query result
 report_content.head()
 
-input_filename = "input/"+report_name+".pbix"
+input_filename = "input/reports"+report_name+".pbix"
 #writing pbix file onto disk - delayed to next release
 with open(input_filename, "wb") as fh:
     fh.write(report_content['BinaryContent'][0])
