@@ -85,10 +85,12 @@ sp = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
 #now, time to parse the Section1.m file
 
-regex_metadata = re.compile('(\".*?\")')
+regexç_metadata = re.compile('(= \".*?\")') # test only
 section_script = open('input/temp/Section1.m', 'r').read()
 
 metadata = regex_metadata.findall(section_script)
+
+metadata
 
 #writing database csv file
 
@@ -103,16 +105,18 @@ output.write("+++ Host - end +++\n\n")
 #write database definitions
 output.write("+++ Database - begin +++\n")
 output.write("Name,Host,Description,Vendor,Version,Instance,Location,DBMS\n")
+output.write(metadata[1]+","+metadata[0]+",\n")
+
 ## TODO: build a pandas dataframe with database definitions, or any another tabular writing to the file
-#reports[report_columns].to_csv(output,header=False,index=False) #using reindex due to a future warning
 output.write("+++ Database - end +++")
-output.close()
+
 
 #write schema definitions
 output.write("+++ Schema - begin +++\n")
 output.write("Name,Host,Database,Description\n")
 ## TODO: build a pandas dataframe with schema definitions, or any another tabular writing to the file
-#reports[report_columns].to_csv(output,header=False,index=False) #using reindex due to a future warning
+
 output.write("+++ Schema - end +++")
+output.close()
 
 ## TODO: evaluate if its possible to bring table level metadata to the dance floor
