@@ -1,5 +1,6 @@
 .env
 output/bi_reports.csv
+output/database_sources.csv
 input/*.pbix
 input/temp/*
 boilerplate.py
