@@ -1,6 +1,14 @@
+# .env file contains sensitive information
 .env
-output/bi_reports.csv
-output/database_sources.csv
-input/*.pbix
-input/temp/*
+
+# input folder have data downloaded and transformed from pbi Report Server
+input/*
+
+# output folder have the files to be imported by IGC
+output/*
+
+# boilerplate is a stub file to debug code, feel free to create one
 boilerplate.py
+
+# generated .pyc files
+__pycache__
