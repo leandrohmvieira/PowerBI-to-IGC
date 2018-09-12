@@ -9,6 +9,8 @@ import pandas as pd
 import zipfile
 import subprocess
 import re
+#necessary for data-explorer, if needed
+#pd.options.display.html.table_schema = True
 
 #get environment variables from .env file
 import os
