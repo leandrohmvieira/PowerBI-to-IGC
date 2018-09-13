@@ -1,9 +1,7 @@
 #library to manage all IO operations with the Power Bi Report Server
 import pyodbc
-import os
-from dotenv import load_dotenv, find_dotenv
 import pandas as pd
-
+import os
 class PbiServer:
 
     server = None
@@ -11,18 +9,23 @@ class PbiServer:
     username = None
     password = None
     connection = None
+    local_repository = None
 
     def __init__(self):
-        load_dotenv(find_dotenv())
         self.server = os.getenv("SERVER")
         self.database = os.getenv("DATABASE")
         self.username = os.getenv("USER")
         self.password = os.getenv("PASSWORD")
         self.connection = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+self.server+';DATABASE='+self.database+';UID='+self.username+';PWD='+ self.password)
+        self.local_repository = "input/reports/"
+
+    def download_all_reports(self):
+        """
+        Download all reports from pbi report server, by querying its BinaryContent from table catalogitemextendedcontent
+        and saving its contents into a file.
 
 
-    def download_all_reports(self,reports_directory="input/reports/"):
-
+        """
         all_reports_query = open('select_all_reports.sql', 'r').read()
         report_content_query = open('select_report_content.sql', 'r').read()
         reports = pd.read_sql_query(all_reports_query, self.connection)
@@ -33,9 +36,9 @@ class PbiServer:
             os.sys.stdout.write('\r')
             #download report into reports Folder
             report_content = pd.read_sql_query(report_content_query,self.connection,params=[report.itemid])
-            input_filename = reports_directory+report.name+".pbix"
+            input_filename = self.local_repository+report.name+".pbix"
             with open(input_filename, "wb") as pbix_file:
                 pbix_file.write(report_content['BinaryContent'][0])
             pbix_file.close()
             del pbix_file
-        return reports
+        return local_repository
