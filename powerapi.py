@@ -2,6 +2,7 @@
 import pyodbc
 import pandas as pd
 import os
+
 class PbiServer:
 
     server = None
@@ -36,7 +37,7 @@ class PbiServer:
             os.sys.stdout.write('\r')
             #download report into reports Folder
             report_content = pd.read_sql_query(report_content_query,self.connection,params=[report.itemid])
-            input_filename = self.local_repository+report.name+".pbix"
+            input_filename = self.local_repository+report.itemid+".pbix"
             with open(input_filename, "wb") as pbix_file:
                 pbix_file.write(report_content['BinaryContent'][0])
             pbix_file.close()
