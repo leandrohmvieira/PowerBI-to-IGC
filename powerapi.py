@@ -10,7 +10,6 @@ class PbiServer:
     username = None
     password = None
     connection = None
-    local_repository = None
 
     def __init__(self):
         self.server = os.getenv("SERVER")
@@ -18,9 +17,8 @@ class PbiServer:
         self.username = os.getenv("USER")
         self.password = os.getenv("PASSWORD")
         self.connection = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+self.server+';DATABASE='+self.database+';UID='+self.username+';PWD='+ self.password)
-        self.local_repository = "input/reports/"
-
-    def download_all_reports(self):
+        
+    def download_all_reports(self,repository):
         """
         Download all reports from pbi report server, by querying its BinaryContent from table catalogitemextendedcontent
         and saving its contents into a file.
@@ -37,9 +35,11 @@ class PbiServer:
             os.sys.stdout.write('\r')
             #download report into reports Folder
             report_content = pd.read_sql_query(report_content_query,self.connection,params=[report.itemid])
-            input_filename = self.local_repository+report.itemid+".pbix"
+            input_filename = repository.reports+report.itemid+".pbix"
             with open(input_filename, "wb") as pbix_file:
                 pbix_file.write(report_content['BinaryContent'][0])
             pbix_file.close()
-            del pbix_file
+        del pbix_file
+        del all_reports_query
+        del report_content_query
         return local_repository
