@@ -7,6 +7,8 @@ import re
 
 get_variables = re.compile('shared (\w+) = \"([\w.:]+)\"') # 2 groups, first group is variable name and the second is variable value
 get_sources = re.compile('DB2\.Database\W*\((\w+)\W+(\w+)[\s\S]+?Query=\"([\s\S]+?)\"') # 3 groups, host variable, database variable, and Query executed
+get_query_from_tables = re.compile('FROM\s+(\w+)\.(\w+)') # 2 groups, schema and name of all tables right after a FROM keyword
+get_query_join_tables = re.compile('JOIN\s+(\w+)\.(\w+)') # 2 groups, schema and name of all tables right after a JOIN keyword
 
 def has_db2_sources(itemid):
     try:
