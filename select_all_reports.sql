@@ -4,7 +4,7 @@ SELECT
 	Name as name,
 	'server' as server,
 	left([Path],LEN([Path])-LEN(Name)-1) as folder,
-	'No description' as description
+	ISNULL(Description,'No description') as description
 FROM
 	dbo.[catalog]
 where
