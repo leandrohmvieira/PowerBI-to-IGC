@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<descriptor xmlns="http://www.ibm.com/iis/igc/asset-type-descriptor"
+	bundleId="PowerBI"> <!-- short ID for preventing clashes with other asset bundles -->
+
+<!-- ****************************************************************** -->
+<!-- ********* GUI Containers: Families, Trees ********** -->
+
+	<family position="2" classRefs="PbiServer" >
+		<label key="family1" inDefaultLocale="PowerBI" />
+	</family>
+
+	<tree position="3" rootClassRefs="PbiServer">
+		<label key="tree1" inDefaultLocale="Power BI Servers" />
+	</tree>
+
+<!-- ****************************************************************** -->
+<!-- ********* Structural definitions: Classes, Attributes ********** -->
+<!-- *********    Hierarchy: Project - Job - Stage - Field ********** -->
+
+<!-- ********* Project ********** -->
+
+	<class localId="PbiServer" dataAccessRole="None" canHaveImage="true">
+		<label key="class.PbiServer" inDefaultLocale="Power BI Server" />
+		<pluralLabel key="class-plural.PbiServer" inDefaultLocale="Power BI Servers" />
+
+		<headerSection>
+			<attribute localId="phase" type="String" editable="true">
+				<label key="attr.PbiServer.phase" inDefaultLocale="Phase" />
+
+				<validValue localId="DEV">
+					<label key="enum.Phase.DEV" inDefaultLocale="In Development" />
+				</validValue>
+				<validValue localId="TEST">
+					<label key="enum.Phase.TEST" inDefaultLocale="Undergoes Testing" />
+				</validValue>
+				<validValue localId="PROD">
+					<label key="enum.Phase.PROD" inDefaultLocale="In Production" />
+				</validValue>
+			</attribute>
+		</headerSection>
+	</class>
+
+</descriptor>
