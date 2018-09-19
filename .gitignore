@@ -7,8 +7,8 @@ input/*
 # output folder have the files to be imported by IGC
 output/*
 
-# boilerplate is a stub file to debug code, feel free to create one
-boilerplate.py
+# boilerplate are stub files to debug code, feel free to create yours
+boilerplate*.*
 
 # generated .pyc files
 __pycache__
