@@ -3,6 +3,7 @@ import powerapi
 from repository import Repository
 import pqparser as pqp #pq stands for Power Query, dont get me wrong
 import numpy as np
+from igcapi import igc
 
 #get environment variables from .env file
 import os
@@ -12,11 +13,16 @@ load_dotenv(find_dotenv())
 #create a Power Bi Server connection and a local repository of files
 pbi = powerapi.PbiServer()
 repo = Repository()
+igc = igc()
+
+igc.get_terms()
 
 #pbi.download_all_reports(repo)
 #repo.extract_pbi_queries()
 
 reports = pbi.get_report_list()
+
+reports
 
 import numpy as np
 
@@ -30,7 +36,10 @@ db2_reports['itemid'][0]
 
 meta = pqp.get_metadata(db2_reports['itemid'][0])
 
-meta[0].get('query')
-# TODO: time to parse this query
+meta
 
-meta = meta[0]
+query = meta[0].get('query')
+
+query_meta = pqp.get_query_from_tables.findall(query)
+
+query_meta
