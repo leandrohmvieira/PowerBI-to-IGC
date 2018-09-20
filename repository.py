@@ -10,18 +10,19 @@ class Repository:
     reports = None
     metadata = None
     temp = None
+    bundle = None
 
     def __init__(self,path='input/'):
         self.base = path
         self.reports = path+'reports/'
         self.metadata = path+'metadata/'
         self.temp = path+'temp/'
+        self.bundle = 'bundle/'
 
     def clear_temp(self):
         files = glob.glob(self.temp+'**',recursive=True)
         for f in files:
             shutil.rmtree(f,ignore_errors=True)
-
 
     def clear_reports(self):
         files = glob.glob(self.reports+'**',recursive=True)
@@ -56,3 +57,7 @@ class Repository:
             #get Section1.m file and move it to another folder
             shutil.move(self.temp+'Section1.m', self.metadata+input_filename.split('\\')[1].split('.')[0]+'.m')
             self.clear_temp()
+    def build_bundle(self):
+        output_filename = 'bundle.zip'
+        os.remove(self.bundle+'bundle.zip')
+        shutil.make_archive(output_filename, 'zip', self.bundle)
