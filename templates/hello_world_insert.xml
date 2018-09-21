@@ -1,0 +1,65 @@
+
+<!--  This is a simple example of how to insert a bundled asset on IGC  -->
+
+<doc xmlns="http://www.ibm.com/iis/flow-doc">
+
+<assets>
+  <asset class="$PowerBI-PbiServer" repr="Servidor Produção" ID="a1">
+    <attribute name="name" value="Servidor Produção"/>
+    <attribute name="short_description" value="Servidor Produção 2"/>
+    <attribute name="$phase" value="PROD"/>
+  </asset>
+  <!--  ************************  -->
+  <!--  	Example with a container reference:  -->
+  <!--
+  	For XML attributes that describe an asset, see comment #1 above.
+ -->
+ <asset class="$PowerBI-PbiFolder" repr="raiz" ID="a2">
+  <!--
+  		Required: 'name' attribute, part of logical asset identity, see #2.
+ -->
+ <attribute name="name" value="raiz"/>
+  <!--
+  		6. If an asset's class defines a container relationship, then:
+ -->
+  <!--
+  			a. List the container asset in the same import doc (preferably above, by convention).
+ -->
+  <!--  			b. State the reference to the container asset.   -->
+  <!--
+  		XML Attributes that describe a reference to the container asset:
+ 				name:     REST name of the container reference, in the form: '$' <container-class-localId>
+ 				assetIDs: Exactly one ID of the asset that contains this asset, within this doc.
+ 			Example:
+ 			This asset's class defines a containment relationship: containerClassRefs="Project".
+ 			Therefore, this asset must point to its container asset:
+ -->
+ <reference name="$PbiServer" assetIDs="a1"/>
+ </asset>
+ <asset class="$PowerBI-PbiFolder" repr="diretorio 1" ID="a3">
+  <!--
+      Required: 'name' attribute, part of logical asset identity, see #2.
+ -->
+ <attribute name="name" value="diretorio 1"/>
+  <!--
+      6. If an asset's class defines a container relationship, then:
+ -->
+  <!--
+        a. List the container asset in the same import doc (preferably above, by convention).
+ -->
+  <!--  			b. State the reference to the container asset.   -->
+  <!--
+      XML Attributes that describe a reference to the container asset:
+        name:     REST name of the container reference, in the form: '$' <container-class-localId>
+        assetIDs: Exactly one ID of the asset that contains this asset, within this doc.
+      Example:
+      This asset's class defines a containment relationship: containerClassRefs="Project".
+      Therefore, this asset must point to its container asset:
+ -->
+ <reference name="$PbiFolder" assetIDs="a2"/>
+ </asset>
+</assets>
+
+
+<importAction partialAssetIDs="a1" completeAssetIDs="a2"/>
+</doc>
