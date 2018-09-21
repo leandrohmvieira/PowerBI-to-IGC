@@ -5,7 +5,7 @@
 <!-- ****************************************************************** -->
 <!-- ********* GUI Containers: Families, Trees ********** -->
 
-	<family position="2" classRefs="PbiServer" >
+	<family position="2" classRefs="PbiServer, PbiFolder, PbiReport" >
 		<label key="family1" inDefaultLocale="PowerBI" />
 	</family>
 
@@ -15,9 +15,9 @@
 
 <!-- ****************************************************************** -->
 <!-- ********* Structural definitions: Classes, Attributes ********** -->
-<!-- *********    Hierarchy: Project - Job - Stage - Field ********** -->
+<!-- *********    Hierarchy: PbiServer - PbiFolder - PbiReport - PbiQuery - PbiQueryMember ********** -->
 
-<!-- ********* Project ********** -->
+<!-- ********* PbiServer ********** -->
 
 	<class localId="PbiServer" dataAccessRole="None" canHaveImage="true">
 		<label key="class.PbiServer" inDefaultLocale="Power BI Server" />
@@ -39,5 +39,73 @@
 			</attribute>
 		</headerSection>
 	</class>
+
+<!-- ********* PbiFolder ********** -->
+
+	<class localId="PbiFolder" containerClassRefs="PbiServer,PbiFolder" canHaveImage="true">
+		<label key="class.PbiFolder" inDefaultLocale="Power BI Folder" />
+		<pluralLabel key="class-plural.PbiFolder" inDefaultLocale="Power BI Folders" />
+
+		<headerSection>
+			<attribute localId="version" type="String" >
+				<label key="attr.PbiFolder.version" inDefaultLocale="Version" />
+			</attribute>
+		</headerSection>
+
+		<section>
+			<label key="section.PbiFolder.Details" inDefaultLocale="Folder Details" />
+
+			<attribute localId="author" type="String">
+				<label key="attr.PbiFolder.author" inDefaultLocale="Author" />
+			</attribute>
+
+		</section>
+	</class>
+
+<!-- ********* PbiReport ********** -->
+
+<class localId="PbiReport" containerClassRefs="PbiFolder" canHaveImage="true">
+	<label key="class.PbiReport" inDefaultLocale="Power Bi Report" />
+	<pluralLabel key="class-plural.PbiReport" inDefaultLocale="PowerBI Reports" />
+
+	<headerSection>
+		<attribute localId="version" type="String" >
+			<label key="attr.PbiReport.version" inDefaultLocale="Version" />
+		</attribute>
+	</headerSection>
+
+	<section>
+		<label key="section.PbiReport.Details" inDefaultLocale="Report Details" />
+
+		<attribute localId="author" type="String">
+			<label key="attr.PbiReport.author" inDefaultLocale="Author" />
+		</attribute>
+
+	</section>
+</class>
+
+<!-- ********* PbiQuery ********** -->
+
+</descriptor>
+
+<class localId="PbiQuery" containerClassRefs="PbiReport" canHaveImage="true">
+	<label key="class.PbiQuery" inDefaultLocale="Power Bi Query" />
+	<pluralLabel key="class-plural.PbiQuery" inDefaultLocale="PowerBI Queries" />
+
+	<headerSection>
+		<attribute localId="version" type="String" >
+			<label key="attr.PbiQuery.version" inDefaultLocale="Version" />
+		</attribute>
+	</headerSection>
+
+	<section>
+		<label key="section.PbiQuery.Details" inDefaultLocale="Query Details" />
+
+		<attribute localId="author" type="String">
+			<label key="attr.PbiQuery.author" inDefaultLocale="Author" />
+		</attribute>
+
+	</section>
+</class>
 
 </descriptor>
