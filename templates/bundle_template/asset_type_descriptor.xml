@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<descriptor xmlns="http://www.ibm.com/iis/igc/asset-type-descriptor"
-	bundleId="PowerBI"> <!-- short ID for preventing clashes with other asset bundles -->
-
+<descriptor xmlns="http://www.ibm.com/iis/igc/asset-type-descriptor" 
+	bundleId="DataMass"> <!-- short ID for preventing clashes with other asset bundles -->
+		 
 <!-- ****************************************************************** -->
 <!-- ********* GUI Containers: Families, Trees ********** -->
-
+	
 	<family position="2" classRefs="Project, Job, Stage, DataField" >
 		<label key="family1" inDefaultLocale="DataMass Processing" />
 	</family>
-
+	   
 	<tree position="3" rootClassRefs="Project">
 		<label key="tree1" inDefaultLocale="DataMass Projects" />
 	</tree>
-
+		 
 <!-- ****************************************************************** -->
 <!-- ********* Structural definitions: Classes, Attributes ********** -->
 <!-- *********    Hierarchy: Project - Job - Stage - Field ********** -->
-
+	
 <!-- ********* Project ********** -->
 
-	<class localId="Project" dataAccessRole="None" canHaveImage="true">
+	<class localId="Project" dataAccessRole="None" canHaveImage="true">	
 		<label key="class.Project" inDefaultLocale="DataMass Project" />
 		<pluralLabel key="class-plural.Project" inDefaultLocale="DataMass Projects" />
-
-		<headerSection>
+		
+		<headerSection>						
 			<attribute localId="phase" type="String" editable="true">
 				<label key="attr.Project.phase" inDefaultLocale="Phase" />
-
+				
 				<validValue localId="DEV">
 					<label key="enum.Phase.DEV" inDefaultLocale="In Development" />
 				</validValue>
@@ -36,83 +36,83 @@
 				<validValue localId="PROD">
 					<label key="enum.Phase.PROD" inDefaultLocale="In Production" />
 				</validValue>
-			</attribute>
-		</headerSection>
+			</attribute> 
+		</headerSection>											
 	</class>
-
+	
 <!-- ********* Job ********** -->
-
+		
 	<class localId="Job" containerClassRefs="Project" canHaveImage="true" expandableInLineage="true" >
 		<label key="class.Job" inDefaultLocale="DataMass Job" />
 		<pluralLabel key="class-plural.Job" inDefaultLocale="DataMass Jobs" />
-
+		
 		<headerSection>
 			<attribute localId="version" type="String" >
 				<label key="attr.Job.version" inDefaultLocale="Version" />
-			</attribute>
+			</attribute> 
 		</headerSection>
-
+		
 		<section>
 			<label key="section.Job.Details" inDefaultLocale="Job Details" />
 
 			<attribute localId="author" type="String">
 				<label key="attr.Job.author" inDefaultLocale="Author" />
 			</attribute>
-
+			
 		</section>
 	</class>
-
+	
 <!-- ********* Stages ********** -->
 
-	<class localId="Stage" containerClassRefs="Job" canHaveImage="false">
+	<class localId="Stage" containerClassRefs="Job" canHaveImage="false">									
 		<label key="class.Stage" inDefaultLocale="DataMass Stage" />
 		<pluralLabel key="class-plural.Stage" inDefaultLocale="DataMass Stages" />
-
+		
 		<headerSection>
 			<attribute localId="stageType" type="String" >
 				<label key="attr.Stage.stageType" inDefaultLocale="Stage Type" />
-			</attribute>
+			</attribute> 
 		</headerSection>
 	</class>
 
-	<class localId="Stage_Transformer" superClassRef="Stage">
+	<class localId="Stage_Transformer" superClassRef="Stage">									
 		<label key="class.Stage_Transformer" inDefaultLocale="DataMass Transformer Stage" />
 		<pluralLabel key="class-plural.Stage_Transformer" inDefaultLocale="DataMass Transformer Stages" />
 	</class>
 
-	<class localId="Stage_File" superClassRef="Stage" >
+	<class localId="Stage_File" superClassRef="Stage" >									
 		<label key="class.Stage_File" inDefaultLocale="DataMass File Stage" />
 		<pluralLabel key="class-plural.Stage_File" inDefaultLocale="DataMass File Stages" />
 	</class>
-
+	
 <!-- ********* DataField ********** -->
-
+		
 	<class localId="DataField" containerClassRefs="Stage" canHaveImage="false" >
 		<label key="class.DataField" inDefaultLocale="DataMass Job Field" />
 		<pluralLabel key="class-plural.DataField" inDefaultLocale="DataMass Job Fields" />
-
+		
 		<headerSection>
 			<attribute localId="datatype" type="String" >
 				<label key="attr.DataField.datatype" inDefaultLocale="Data Type" />
-			</attribute>
+			</attribute> 
 		</headerSection>
-
+		
 		<section>
 			<label key="section.DataField.Rules" inDefaultLocale="Rules" />
 
 			<attribute localId="derivationExpression" type="LongText">
 				<label key="attr.DataField.derivationExpression" inDefaultLocale="Expression" />
 			</attribute>
-
+			
 		</section>
-
+		
 		<section>
 			<label key="section.DataField.Analytics" inDefaultLocale="Analytics" />
 
 			<attribute localId="usageDensity" type="Double">
 				<label key="attr.DataField.analytics" inDefaultLocale="Analytics" />
 			</attribute>
-
+			
 		</section>
 	</class>
 </descriptor>
