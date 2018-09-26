@@ -29,19 +29,17 @@ class igc:
         return r.text
 
     def check_bundle(self):
-        # TODO: verify if our bundle exists on igc
         r = self.session.get(self.base_url+'bundles/')
         return 'PowerBI' in r.text
 
     def register_bundle(self,repository):
-        # TODO: post zipped bundle onto igc
         files={'file': open(repository.bundle+'bundle.zip','rb')}
         return self.session.post(self.base_url+'bundles/',files= files)
 
-    def insert_asset(self,asset):
-        # TODO: well, dont know how to do it yet, open to suggestions
-        r = self.session.post(self.base_url+'bundles/assets/',params = payload)
-        return r.text
+    def insert_all_assets(self,asset):
+        string={'string':asset}
+        r = self.session.post(self.base_url+'bundles/assets/',params = string)
+        return r
 
     def delete_bundle(self):
         if self.check_bundle():
@@ -51,6 +49,7 @@ class igc:
         else:
             return 'No bundle registered'
 
+    #internal_id property, used to create a temporary id to all assets that going into XML
     def get_internal_id(self):
         self._internal_id += 1
         return 'a'+str(self._internal_id)
@@ -58,19 +57,4 @@ class igc:
     def set_internal_id(self,value):
         self._internal_id = value
 
-    @property
-    def internal_id():
-        doc = "The internal_id property, return a plus a number, incrementally"
-
-        def fget(self):
-            self._internal_id += 1
-            return 'a'+str(self._internal_id)
-
-        @internal_id.setter
-        def fset(self, value):
-            self._internal_id = value
-
-        def fdel(self):
-            del self._internal_id
-        return locals()
-    internal_id = property(**internal_id())
+    internal_id = property(get_internal_id,set_internal_id)
