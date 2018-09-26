@@ -43,6 +43,11 @@ class PbiServer:
         del all_reports_query
         del report_content_query
         return None
+
     def get_report_list(self):
         all_reports_query = open('select_all_reports.sql', 'r').read()
         return pd.read_sql_query(all_reports_query, self.connection)
+
+    def get_folder_list(self):
+        all_folders_query = open('select_all_folders.sql', 'r').read()
+        return pd.read_sql_query(all_folders_query, self.connection)
