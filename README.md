@@ -1,25 +1,39 @@
 # PowerBI-to-IGC
-Simple Python app that connects to Power BI Report Server, crunch it's metadata and load it to IGC(IBM Information Governance Catalog)
+
+This Application aims to extract metadata from Power BI reports and represent it on Information Governance Catalog, using the OpenIgc rest api.
+
+## Bundle definition
+
+The Power BI bundle hierarchy is defined as:
+
+* Power BI Server
+  * Power BI Folder
+    * Power BI Folder(Folder is a self containable class)
+      * Power BI Report
+        * Power BI Query
 
 
-## Application roadmap, so far:
+## How to use this Application
 
-* V0.1 -EXTREME GO HORSE EDITION, able to generate a CSV with generic reports to be imported by CSV bridge
+This app is still on development and is not ready to be used yet, BUT, you can download release 0.1, that contains a CSV generator, which creates a file that can be imported using IGC CSV bridge.
 
-* V0.2 - ULTRA EXTREME GO HORSE EDITION, able to extract and parse metadata from a .pbix file(but not generating any outputs, yet)
-
-* V0.3(in progress) - Refactored and better structured code, which create a Power BI Bundle, Along with all reports from PBI report server
-
-# How to use this Script(v0.1)
+# Using Script(v0.1)
 
 * First, if you haven't, [install ODBC Driver 13 for SQL Server](https://www.microsoft.com/en-us/download/details.aspx?id=53339)
 
 * Also, if you haven't, [install 7-zip](https://www.7-zip.org/download.html)
-  * 7-zip is needed to extract an specific zip file on the go, i'm looking on a way to get rid off this dependence
+  * 7-zip is needed to extract an specific zip file on the go
 
 * Then, create a .env file on the project and fill it based on template.env
 
+## Application roadmap, so far:
 
-## update v0.3 (on dev phase, ON MASTER)
+* V0.1 - CSV generator which generate a csv file that contains the host, folders and reports, ready to be imported by IGC CSV bridge
 
-CSV bridge will be replaced by OpenIGC API
+* V0.2 (in progress) - Application will register a bundle on OpenIGC, and will add all folders and reports under the custom bundle
+
+* V0.3 - Ability to ingest and show queries from power BI made on DB2 only
+
+## Contributing
+
+This is a open source project and i welcome any contributions, please feel free to reach me if you want to join this project
