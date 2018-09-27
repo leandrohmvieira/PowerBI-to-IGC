@@ -37,8 +37,8 @@ class igc:
         return self.session.post(self.base_url+'bundles/',files= files)
 
     def insert_all_assets(self,asset):
-        string={'string':asset}
-        r = self.session.post(self.base_url+'bundles/assets/',params = string)
+        headers={'content-type': 'application/xml'}
+        r = self.session.post(self.base_url+'bundles/assets/',data = asset, headers=headers)
         return r
 
     def delete_bundle(self):
