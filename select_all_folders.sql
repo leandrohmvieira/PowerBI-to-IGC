@@ -1,7 +1,7 @@
 -- Bring all folders from PBI server
 SELECT
 	ItemID as itemid,
-	Name as name,
+	COALESCE(NULLIF(Name,''),'root') as name,
 	ParentID as parentid,
 	ISNULL(Description,'No description') as description
 FROM
