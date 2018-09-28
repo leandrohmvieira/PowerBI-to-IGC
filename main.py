@@ -20,6 +20,7 @@ import pqparser as pqp #pq stands for Power Query, dont get me wrong
 import numpy as np
 from igcapi import igc
 import pandas as pd
+import xmlfactory as xml
 
 #get environment variables from .env file
 import os
@@ -37,17 +38,17 @@ r = igc.delete_bundle()
 # Step 2: Register bundle
 result = igc.register_bundle(repo)
 
-result.content
-
 # Step 3: Download Power BI db2_reports
 #pbi.download_all_reports(repo)
 
 # Step 4: Extract the M scripts of all reports
 #repo.extract_pbi_queries()
 
-# Step 5: Generate a pandas dataframe for hosts, folders, reports and schemas
+# Step 5: Generate a pandas dataframe for hosts, folders, reports and Queries
 
-#host
+
+## TODO: internal_id generation must be moved to xmlfactory
+
 host = [{"name":os.getenv("SERVER"),
         "short_description":os.getenv("DATABASE"),
         "long_description":"",
@@ -84,66 +85,10 @@ for idx,row in reports.iterrows():
 reports = reports.set_index('parentid').join(folders.set_index('itemid'),rsuffix='_folder')
 folders.parentid.fillna('',inplace=True)
 
-from lxml import etree
 
-#create doc
-doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
-#create assets
-assets = etree.SubElement(doc,"assets")
-#create host
-asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
-#create host attributes
-for idx,series in hosts.iterrows():
-    for column in series.keys():
-        asset.append(etree.Element("attribute",{"name":column,"value":series[column]}))
-
-#create folder assets
-for idx,row in folders.iterrows():
-    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
-    #create folder attributes
-    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-    #create containment reference
-    if len(row.parentid) == 0:
-        asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
-    else:
-        asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
-
-#create report assets
-for idx,row in reports.iterrows():
-    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
-    #create folder attributes
-    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-    #create containment reference
-    asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
+# Step 6: Generate XML string with assets to be inserted
+xml_file = xml.build_xml(host,hosts,folders,reports)
 
 
-	# <headerSection>
-	# 	<attribute localId="version" type="String" >
-	# 		<label key="attr.PbiReport.version" inDefaultLocale="Version" />
-	# 	</attribute>
-	# </headerSection>
-    #
-	# <section>
-	# 	<label key="section.PbiReport.Details" inDefaultLocale="Report Details" />
-    #
-	# 	<attribute localId="author" type="String">
-	# 		<label key="attr.PbiReport.author" inDefaultLocale="Author" />
-	# 	</attribute>
-    #
-	# </section>
-
-
-#create importAction
-
-importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
-
-
-
-with open('output/generated.xml','wb') as f:
-    f.write(etree.tostring(doc,pretty_print=True))
-
-xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
-
-request = igc.insert_all_assets(xml)
-
-request.content
+# Step 7: Call asset insert request
+request = igc.insert_all_assets(xml_file)

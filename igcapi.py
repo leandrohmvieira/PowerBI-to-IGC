@@ -49,7 +49,7 @@ class igc:
         else:
             return 'No bundle registered'
 
-    #internal_id property, used to create a temporary id to all assets that going into XML
+    #internal_id property, used to create a temporary id to all assets that going into XML TODO: move this to xmlfactory, is used only by it
     def get_internal_id(self):
         self._internal_id += 1
         return 'a'+str(self._internal_id)

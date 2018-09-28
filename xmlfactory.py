@@ -1,23 +1,47 @@
+import os
+from lxml import etree
+import pandas as pd
 
-#https://lxml.de/tutorial.html
+def build_xml(host,hosts,folders,reports):
 
-import lxml.etree
-import lxml.builder
+    #create doc
+    doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
+    #create assets
+    assets = etree.SubElement(doc,"assets")
+    #create host
+    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
+    #create host attributes
+    for idx,series in hosts.iterrows():
+        for column in series.keys():
+            asset.append(etree.Element("attribute",{"name":column,"value":series[column]}))
 
-E = lxml.builder.ElementMaker()
-#element('value', anye params with commas)
-#element('value',{dict with params})
-DOC = E.doc
-ASSETS = E.assets
-ASSET = E.asset
-ATTRIBUTE = E.attribute
+    #create folder assets
+    for idx,row in folders.iterrows():
+        asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
+        #create folder attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+        #create containment reference
+        if len(row.parentid) == 0:
+            asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
+        else:
+            asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
 
-the_doc = DOC(
-                ASSETS(
-                    ASSET( #cclass='$PowerBI-PbiServer',repr='Servidor Produção'
-                        ATTRIBUTE({'name':'name', 'value':'Servidor Produção'})
-                        )
-                    ),xmlns='http://www.ibm.com/iis/flow-doc'
-            )
+    #create report assets
+    for idx,row in reports.iterrows():
+        asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
+        #create folder attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
 
-print(lxml.etree.tostring(the_doc, pretty_print=True))
+    #create importAction
+
+    importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
+
+
+
+    with open('output/generated.xml','wb') as f:
+        f.write(etree.tostring(doc,pretty_print=True))
+
+    xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
+    return xml
