@@ -86,8 +86,6 @@
 
 <!-- ********* PbiQuery ********** -->
 
-</descriptor>
-
 <class localId="PbiQuery" containerClassRefs="PbiReport" canHaveImage="true">
 	<label key="class.PbiQuery" inDefaultLocale="Power Bi Query" />
 	<pluralLabel key="class-plural.PbiQuery" inDefaultLocale="PowerBI Queries" />
