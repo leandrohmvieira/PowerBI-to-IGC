@@ -2,7 +2,7 @@ import os
 from lxml import etree
 import pandas as pd
 
-def build_xml(host,hosts,folders,reports):
+def build_xml(host,hosts,folders,reports,queries):
 
     #create doc
     doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
