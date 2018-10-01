@@ -46,9 +46,9 @@ result = igc.register_bundle(repo)
 
 # Step 5: Generate a pandas dataframe for hosts, folders, reports and Queries
 
-
 ## TODO: internal_id generation must be moved to xmlfactory
 
+###########################HOSTS##################
 host = [{"name":os.getenv("SERVER"),
         "short_description":os.getenv("DATABASE"),
         "long_description":"",
@@ -58,7 +58,7 @@ host = [{"name":os.getenv("SERVER"),
 hosts = pd.DataFrame(host)
 hosts.drop('internal_id',inplace=True,axis=1)## TODO: fix this shit later
 
-#folders
+##################FOLDERS#########################
 folders = pbi.get_folder_list()
 
 #create and populate a internal_id field, which is used to perform containment relationships
@@ -74,7 +74,7 @@ folders2 = folders[folders.itemid.isin(folders.parentid)]
 folders = folders.set_index('parentid').join(folders2.set_index('itemid'),rsuffix='_parent')
 folders.parentid.fillna('',inplace=True)
 
-#reports
+##################REPORTS#########################
 reports = pbi.get_report_list()
 
 #create and populate a internal_id field, which is used to perform containment relationships
@@ -83,11 +83,32 @@ for idx,row in reports.iterrows():
 
 #join child and father dataframes, to have both internal ids on a row
 reports = reports.set_index('parentid').join(folders.set_index('itemid'),rsuffix='_folder')
+reports.reset_index(inplace=True)
 folders.parentid.fillna('',inplace=True)
+
+#################QUERIES##########################
+
+reports['metadata'] = np.vectorize(pqp.get_metadata)(reports['itemid'])
+
+metadata = reports.metadata.dropna().reset_index()
+
+metadata_list = []
+for row in metadata['metadata']:
+    metadata_list.extend(row)
+
+queries = pd.DataFrame(metadata_list)
+
+for idx,row in queries.iterrows():
+    queries.at[idx,"internal_id"] = igc.internal_id
+
+#join child and father dataframes, to have both internal ids on a row
+queries = queries.set_index('reportid').join(reports.set_index('itemid'),rsuffix='_report')
+queries.reset_index(inplace=True)
+#folders.parentid.fillna('',inplace=True)
 
 
 # Step 6: Generate XML string with assets to be inserted
-xml_file = xml.build_xml(host,hosts,folders,reports)
+xml_file = xml.build_xml(host,hosts,folders,reports,queries)
 
 
 # Step 7: Call asset insert request
