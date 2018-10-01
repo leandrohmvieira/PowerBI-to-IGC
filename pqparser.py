@@ -28,6 +28,7 @@ def get_metadata(itemid):
         for vars in metadata:
             vars.update({'host':variables.get(vars.get('host'))})
             vars.update({'database':variables.get(vars.get('database'))})
+            vars.update({'reportid':itemid})
         return metadata
     else:
         return None
