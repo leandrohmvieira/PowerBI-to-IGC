@@ -29,13 +29,22 @@ def build_xml(host,hosts,folders,reports,queries):
     #create report assets
     for idx,row in reports.iterrows():
         asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
-        #create folder attributes
+        #create report attributes
         asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
         #create containment reference
         asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
 
-    #create importAction
+    #create query assets
+    for idx,row in queries.iterrows():
+        asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiQuery","repr":row['name'],"ID":row.internal_id})
+        #create query attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+        asset.append(etree.Element("attribute",{"name":"$query","value":row['query']}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":row.internal_id_report}))
 
+
+    #create importAction
     importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
 
 
