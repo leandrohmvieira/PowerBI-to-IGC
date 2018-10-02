@@ -39,10 +39,10 @@ r = igc.delete_bundle()
 result = igc.register_bundle(repo)
 
 # Step 3: Download Power BI db2_reports
-#pbi.download_all_reports(repo)
+pbi.download_all_reports(repo)
 
 # Step 4: Extract the M scripts of all reports
-#repo.extract_pbi_queries()
+repo.extract_pbi_queries()
 
 # Step 5: Generate a pandas dataframe for hosts, folders, reports and Queries
 
@@ -104,8 +104,17 @@ for idx,row in queries.iterrows():
 #join child and father dataframes, to have both internal ids on a row
 queries = queries.set_index('reportid').join(reports.set_index('itemid'),rsuffix='_report')
 queries.reset_index(inplace=True)
-#folders.parentid.fillna('',inplace=True)
-
+#generate a query name
+queries.sort_values('level_0',inplace=True)
+query_group = None
+for idx,row in queries.iterrows():
+    if row.level_0 != query_group:
+        query_counter = 1
+        query_group = row.level_0
+        row['name'] = "Query "+row['name']+" "+str(query_counter)
+    else:
+        query_counter += 1
+        row['name'] = "Query "+row['name']+" "+str(query_counter)
 
 # Step 6: Generate XML string with assets to be inserted
 xml_file = xml.build_xml(host,hosts,folders,reports,queries)
@@ -113,3 +122,5 @@ xml_file = xml.build_xml(host,hosts,folders,reports,queries)
 
 # Step 7: Call asset insert request
 request = igc.insert_all_assets(xml_file)
+
+request.content
