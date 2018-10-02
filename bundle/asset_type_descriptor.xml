@@ -99,8 +99,8 @@
 	<section>
 		<label key="section.PbiQuery.Details" inDefaultLocale="Query Details" />
 
-		<attribute localId="author" type="String">
-			<label key="attr.PbiQuery.author" inDefaultLocale="Author" />
+		<attribute localId="query" type="LongText">
+			<label key="attr.PbiQuery.query" inDefaultLocale="Select clause" />
 		</attribute>
 
 	</section>
