@@ -24,7 +24,16 @@
  <reference name="$PbiFolder" assetIDs="a2"/>
  </asset>
 
- <!-- End of assets, TODO: Include a report asset and a query asset on this example file -->
+ <asset ID="a4" class="$PowerBI-PbiReport" repr="relatorio 1">
+   <attribute name="name" value="relatorio 1"/>
+   <reference assetIDs="a3" name="$PbiFolder"/>
+ </asset>
+
+ <asset ID="a5" class="$PowerBI-PbiQuery" repr="Query relatorio 1">
+   <attribute name="name" value="Query relatorio 1"/>
+   <attribute name="$query" value="select * from teste"/>
+   <reference assetIDs="a4" name="$PbiReport"/>
+ </asset>
 
 </assets>
 
