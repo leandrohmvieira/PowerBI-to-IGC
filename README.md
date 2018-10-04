@@ -30,9 +30,11 @@ This app is still on development and is not ready to be used yet, BUT, you can d
 
 * V0.1 - CSV generator which generate a csv file that contains the host, folders and reports, ready to be imported by IGC CSV bridge
 
-* V0.2 (in progress) - Application will register a bundle on OpenIGC, and will add all folders and reports under the custom bundle
+* V0.2 - Application will register a bundle on OpenIGC, and will add all folders and reports under the custom bundle
 
-* V0.3 - Ability to ingest and show queries from power BI made on DB2 only
+* V0.3 (ready) - Ability to ingest and show queries from power BI made on DB2 only
+
+* V0.4 (waiting sponsors) - Get metadata from more sources, and add data lineage support
 
 ## Contributing
 
