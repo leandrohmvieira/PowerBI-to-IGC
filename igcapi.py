@@ -10,8 +10,9 @@ class igc:
     base_url = None
     _internal_id = None
 
-    def __init__(self,proxy=False):
+    def __init__(self):
         s = requests.Session()
+        proxy = os.getenv("PROXY_ENABLED")
         if proxy:
             s.proxies = {"http": os.getenv("PROXY_STRING") , "https": os.getenv("PROXY_STRING")}
 
