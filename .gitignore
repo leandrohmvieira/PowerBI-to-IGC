@@ -1,5 +1,5 @@
 # .env file contains sensitive information
-.env
+.env*
 
 # input folder have data downloaded and transformed from pbi Report Server
 input/*
