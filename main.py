@@ -72,7 +72,9 @@ folders2 = folders[folders.itemid.isin(folders.parentid)]
 
 #join child and father dataframes, to have both internal ids on a row
 folders = folders.set_index('parentid').join(folders2.set_index('itemid'),rsuffix='_parent')
+#folders_merge = pd.merge(folders,folders2,left_on='parentid',right_on='itemid',suffixes=('','_parent'))
 folders.parentid.fillna('',inplace=True)
+
 
 ##################REPORTS#########################
 reports = pbi.get_report_list()
