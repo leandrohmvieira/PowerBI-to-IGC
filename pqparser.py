@@ -18,6 +18,8 @@ def has_db2_sources(itemid):
     except IOError as e:
         return None
 
+
+#still on stub
 def get_metadata(itemid):
     if has_db2_sources(itemid):
         file = open('input/metadata/'+itemid+'.m','r',encoding='utf-8').read()
@@ -32,3 +34,38 @@ def get_metadata(itemid):
         return metadata
     else:
         return None
+
+def tables_in_query(sql_str):
+
+    # remove the /* */ comments
+    q = re.sub(r"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", "", sql_str)
+
+    # remove whole line -- and # comments
+    lines = [line for line in q.splitlines() if not re.match("^\s*(--|#)", line)]
+
+    # remove trailing -- and # comments
+    q = " ".join([re.split("--|#", line)[0] for line in lines])
+
+    # split on blanks, parens and semicolons
+    tokens = re.split(r"[\s)(;]+", q)
+
+    # scan the tokens. if we see a FROM or JOIN, we set the get_next
+    # flag, and grab the next one (unless it's SELECT).
+
+    result = set()
+    get_next = False
+    get_alias = False
+    for tok in tokens:
+        if get_alias:
+            result.add((table,tok))
+            get_alias = False
+        elif get_next:
+            if tok.lower() not in ["", "select"]:
+                #result.add(tok)
+                table = tok
+                get_alias = True
+            get_next = False
+        get_next = tok.lower() in ["from", "join"]
+
+    return result
+# FIXME: the method above doesn't work when the last token is a unaliased table
