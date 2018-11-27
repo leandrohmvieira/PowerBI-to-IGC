@@ -135,7 +135,7 @@ for idx,row in columns_frame.iterrows():
 columns_frame = pd.merge(columns_frame,queries,left_on='query_idx',right_index=True)
 
 # Step 6: Generate XML string with assets to be inserted
-xml_file = xml.build_xml(host,hosts,folders,reports,queries,columns_frame)
+xml_file = xml.build_asset_xml(host,hosts,folders,reports,queries,columns_frame)
 
 # Step 7: Call asset insert request
 request = igc.insert_all_assets(xml_file)
