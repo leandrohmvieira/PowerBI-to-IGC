@@ -30,4 +30,4 @@ request = igc.insert_all_assets(xml_insert_file)
 
 # Step 4: Call asset lineage request with lineage template
 xml_lineage_file = open('templates/hello_world_lineage.xml','rb').read()
-request = igc.insert_all_assets(xml_insert_file)
+request = igc.insert_lineage_data(xml_lineage_file)
