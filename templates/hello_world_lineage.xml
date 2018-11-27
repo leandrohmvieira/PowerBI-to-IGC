@@ -1,1 +1,65 @@
-<!-- TODO: Create lineage example for current bundle -->
+<doc
+	xmlns="http://www.ibm.com/iis/flow-doc">
+	<assets>
+
+    <asset class="$PowerBI-PbiServer" repr="Servidor Produção" ID="a1">
+      <attribute name="name" value="Servidor Produção"/>
+    </asset>
+
+    <asset class="$PowerBI-PbiFolder" repr="raiz" ID="a2">
+      <attribute name="name" value="raiz"/>
+      <reference name="$PbiServer" assetIDs="a1"/>
+    </asset>
+
+    <asset class="$PowerBI-PbiFolder" repr="diretorio 1" ID="a3">
+      <attribute name="name" value="diretorio 1"/>
+      <reference name="$PbiFolder" assetIDs="a2"/>
+    </asset>
+
+    <asset ID="a4" class="$PowerBI-PbiReport" repr="relatorio 1">
+      <attribute name="name" value="relatorio 1"/>
+      <reference assetIDs="a3" name="$PbiFolder"/>
+    </asset>
+
+    <asset ID="a5" class="$PowerBI-PbiQuery" repr="Query relatorio 1">
+      <attribute name="name" value="Query relatorio 1"/>
+      <reference assetIDs="a4" name="$PbiReport"/>
+    </asset>
+
+		<asset class="host" repr="bdb2p04.plexbsb.bb.com.br" ID="e1">
+			<attribute name="name" value="bdb2p04.plexbsb.bb.com.br"/>
+		</asset>
+		<asset class="database" repr="DB2 - D3G4" ID="e2">
+			<attribute name="name" value="DB2 - D3G4"/>
+			<reference name="host" assetIDs="e1"/>
+		</asset>
+		<asset class="database_schema" repr="DB2PGE" ID="e3" matchByName="true">
+			<attribute name="name" value="DB2PGE"/>
+			<reference name="database" assetIDs="e2"/>
+		</asset>
+		<asset class="database_table" repr="FATO_DBS_AMTZ_BB" ID="e4" matchByName="true">
+			<attribute name="name" value="FATO_DBS_AMTZ_BB"/>
+			<reference name="database_schema" assetIDs="e3"/>
+		</asset>
+	</assets>
+		<flowUnits>
+		<!--flowUnit assetID="a2">
+			<subFlows flowType="SYSTEM" comment="COLLECTION -> REPORT">
+				<flow sourceIDs="a3 a4" targetIDs="a2"/>
+			</subFlows>
+		</flowUnit-->
+		<flowUnit assetID="a4">
+			<subFlows flowType="DESIGN" comment="table -> query">
+				<flow sourceIDs="e4" targetIDs="a4"/>
+			</subFlows>
+			<subFlows flowType="DESIGN" comment="table -> query">
+				<flow sourceIDs="e4" targetIDs="a5"/>
+			</subFlows>
+		</flowUnit>
+		<!-- <flowUnit assetID="a3">
+			<subFlows flowType="DESIGN" comment="table -> query">
+				<flow sourceIDs="e4" targetIDs="a4"/>
+			</subFlows>
+		</flowUnit> -->
+	</flowUnits>
+</doc>
