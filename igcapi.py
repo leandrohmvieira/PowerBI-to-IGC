@@ -13,7 +13,7 @@ class igc:
     def __init__(self):
         s = requests.Session()
         proxy = os.getenv("PROXY_ENABLED")
-        if proxy:
+        if proxy == '1':
             s.proxies = {"http": os.getenv("PROXY_STRING") , "https": os.getenv("PROXY_STRING")}
 
         s.auth = (os.getenv("IGC_USER"),os.getenv("IGC_PASSWORD"))
