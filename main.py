@@ -118,11 +118,28 @@ for idx,row in queries.iterrows():
         query_counter += 1
         row['name'] = "Query "+row['name']+" "+str(query_counter)
 
-# Step 6: Generate XML string with assets to be inserted
-xml_file = xml.build_xml(host,hosts,folders,reports,queries)
+#################TABLES AND COLUMNS##########################
+cols_frames = []
+for idx,row in queries.iterrows():
 
+    col_list,_,_ = pqp.parse_query(row.query)
+    colpd = pd.DataFrame(list(col_list),columns=['colname','table_alias','tablename'])
+    colpd['query_idx'] = idx
+    cols_frames.append(colpd)
+
+columns_frame = pd.concat(cols_frames)
+
+for idx,row in columns_frame.iterrows():
+    columns_frame.at[idx,"col_internal_id"] = igc.internal_id
+
+columns_frame = pd.merge(columns_frame,queries,left_on='query_idx',right_index=True)
+
+# Step 6: Generate XML string with assets to be inserted
+xml_file = xml.build_xml(host,hosts,folders,reports,queries,columns_frame)
 
 # Step 7: Call asset insert request
 request = igc.insert_all_assets(xml_file)
 
-request.content
+# Step 8: Generate XML string with lineage Information
+
+# Step 9: Call Lineage information registration
