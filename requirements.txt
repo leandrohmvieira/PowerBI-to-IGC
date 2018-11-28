@@ -4,3 +4,4 @@ pyodbc=4.0.23
 sqlparse=0.2.4
 requests>=2.20.0
 numpy=1.14.3
+lxml=4.2.1
