@@ -5,7 +5,7 @@
 <!-- ****************************************************************** -->
 <!-- ********* GUI Containers: Families, Trees ********** -->
 
-	<family position="2" classRefs="PbiServer, PbiFolder, PbiReport" >
+	<family position="2" classRefs="PbiServer, PbiFolder, PbiReport, PbiQuery, PbiQueryItem" >
 		<label key="family1" inDefaultLocale="PowerBI" />
 	</family>
 
@@ -15,7 +15,7 @@
 
 <!-- ****************************************************************** -->
 <!-- ********* Structural definitions: Classes, Attributes ********** -->
-<!-- *********    Hierarchy: PbiServer - PbiFolder - PbiReport - PbiQuery - PbiQueryMember ********** -->
+<!-- *********    Hierarchy: PbiServer - PbiFolder - PbiReport - PbiQuery - PbiQueryItem ********** -->
 
 <!-- ********* PbiServer ********** -->
 
@@ -105,5 +105,28 @@
 
 	</section>
 </class>
+
+<!-- ********* PbiQueryItem ********** -->
+
+<class localId="PbiQueryItem" containerClassRefs="PbiQuery" canHaveImage="true">
+	<label key="class.PbiQueryItem" inDefaultLocale="Power Bi Query Item" />
+	<pluralLabel key="class-plural.PbiQueryItem" inDefaultLocale="PowerBI Query Items" />
+
+	<headerSection>
+		<attribute localId="version" type="String" >
+			<label key="attr.PbiQueryItem.version" inDefaultLocale="Version" />
+		</attribute>
+	</headerSection>
+
+	<section>
+		<label key="section.PbiQueryItem.Details" inDefaultLocale="Query Item Details" />
+
+		<attribute localId="query" type="LongText">
+			<label key="attr.PbiQueryItem.query" inDefaultLocale="Select clause" />
+		</attribute>
+	</section>
+</class>
+
+
 
 </descriptor>
