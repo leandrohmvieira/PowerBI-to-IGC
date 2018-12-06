@@ -109,7 +109,7 @@
 <!-- ********* PbiQueryItem ********** -->
 
 <class localId="PbiQueryItem" containerClassRefs="PbiQuery" canHaveImage="true">
-	<label key="class.PbiQueryItem" inDefaultLocale="Power Bi Query Item" />
+	<label key="class.PbiQueryItem" inDefaultLocale="Power BI Query Item" />
 	<pluralLabel key="class-plural.PbiQueryItem" inDefaultLocale="PowerBI Query Items" />
 
 	<headerSection>
