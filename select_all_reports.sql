@@ -1,11 +1,10 @@
 -- Bring all reports from PBI server
 SELECT
-	ItemID as itemid,
-	Name as name,
-	'server' as server,
-	left([Path],LEN([Path])-LEN(Name)-1) as folder,
-	ISNULL(Description,'No description') as description,
-	ParentID as parentid
+	ItemID as report_itemid,
+	Name as report_name,
+	left([Path],LEN([Path])-LEN(Name)-1) as report_folder,
+	ISNULL(Description,'No description') as report_description,
+	ParentID as report_parentid
 FROM
 	dbo.[catalog]
 where
