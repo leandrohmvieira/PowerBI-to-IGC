@@ -19,14 +19,31 @@ def has_db2_sources(itemid):
         return None
 
 
-#still on stub
+"""
+FUNCTION: get_metadata
+
+input: Report ID(String)
+
+output: A list of dicts containing the queries found into the referred Report, along with the source Host and Database
+
+Description: Receives an itemid, go to file repository, reads the file with this id and parse sql queries inside it,
+then returns the metadata found.
+"""
 def get_metadata(itemid):
+    #only compatible with DB2 yet
     if has_db2_sources(itemid):
+        #open report .m script
         file = open('input/metadata/'+itemid+'.m','r',encoding='utf-8').read()
+
+        #Get host, database and queries from the .m script
         variables = dict(get_variables.findall(file))
         db2_sources = get_sources.findall(file)
+
+        #build a list of dicts, each element is a dict with host, database and executed query(some roports have multiple queries)
         fields = ['host', 'database', 'query']
         metadata = [dict(zip(fields, source)) for source in db2_sources]
+
+        #change the variables aliases to the real variables values
         for vars in metadata:
             vars.update({'host':variables.get(vars.get('host'))})
             vars.update({'database':variables.get(vars.get('database'))})
