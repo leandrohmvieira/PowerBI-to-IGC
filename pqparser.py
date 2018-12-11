@@ -40,14 +40,14 @@ def get_metadata(itemid):
         db2_sources = get_sources.findall(file)
 
         #build a list of dicts, each element is a dict with host, database and executed query(some roports have multiple queries)
-        fields = ['host', 'database', 'query']
+        fields = ['query_host', 'query_database', 'query_content']
         metadata = [dict(zip(fields, source)) for source in db2_sources]
 
         #change the variables aliases to the real variables values
         for vars in metadata:
-            vars.update({'host':variables.get(vars.get('host'))})
-            vars.update({'database':variables.get(vars.get('database'))})
-            vars.update({'reportid':itemid})
+            vars.update({'query_host':variables.get(vars.get('host'))})
+            vars.update({'query_database':variables.get(vars.get('database'))})
+            vars.update({'query_reportid':itemid})
         return metadata
     else:
         return None
