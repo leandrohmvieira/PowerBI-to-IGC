@@ -30,12 +30,12 @@ class PbiServer:
         reports = pd.read_sql_query(all_reports_query, self.connection)
 
         for report in reports.itertuples():
-            print("Downloading {}".format(report.name))
+            print("Downloading {}".format(report.report_name))
             print("{}% completed".format(int(100 * float(report.Index+1)/float(reports.shape[0]))))
             os.sys.stdout.write('\r')
             #download report into reports Folder
             report_content = pd.read_sql_query(report_content_query,self.connection,params=[report.itemid])
-            input_filename = repository.reports+report.itemid+".pbix"
+            input_filename = repository.reports+report.report_itemid+".pbix"
             with open(input_filename, "wb") as pbix_file:
                 pbix_file.write(report_content['BinaryContent'][0])
             pbix_file.close()
