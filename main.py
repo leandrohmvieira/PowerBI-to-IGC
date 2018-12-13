@@ -12,7 +12,6 @@ The process consist of the following steps:
 4 - generate the XML from metadata and upload it to IGC
 
 """
-
 #import my libs
 import powerapi
 from repository import Repository
@@ -44,95 +43,117 @@ pbi.download_all_reports(repo)
 # Step 4: Extract the M scripts of all reports
 repo.extract_pbi_queries()
 
-# Step 5: Generate a pandas dataframe for hosts, folders, reports and Queries
+# Step 5: Generate a pandas dataframe for hosts, folders, reports, Queries and query items
 
-## TODO: internal_id generation must be moved to xmlfactory
+#create id_generator object, which will label the assets. Necessary to build containment relationships
+labeler = xml.id_generator()
 
-###########################HOSTS##################
-host = [{"name":os.getenv("SERVER"),
-        "short_description":os.getenv("DATABASE"),
-        "long_description":"",
-        "$phase":"DEV",
-        "internal_id":igc.internal_id
-        }]
-hosts = pd.DataFrame(host)
-hosts.drop('internal_id',inplace=True,axis=1)## TODO: fix this shit later
+##################HOST##################
+host = pd.DataFrame([{"host_name":os.getenv("SERVER"),
+        "host_short_description":os.getenv("DATABASE"),
+        "host_long_description":"",
+        "host_$phase":"DEV"
+        }])
+
+#add a internal_id to all rows
+host = labeler.label_dataframe(host,field_prefix='host')
+
+#hosts.drop('internal_id',inplace=True,axis=1)## TODO: fix this shit later
+asset_tree = host
 
 ##################FOLDERS#########################
 folders = pbi.get_folder_list()
 
-#create and populate a internal_id field, which is used to perform containment relationships
-for idx,row in folders.iterrows():
-    folders.at[idx,"internal_id"] = igc.internal_id
-
+#add a internal_id to all rows
+folders = labeler.label_dataframe(folders,field_prefix='folder')
 
 #getting internal_id from parent assets
 #create a dataframe with folders that are parent
-folders2 = folders[folders.itemid.isin(folders.parentid)]
+folders2 = folders[folders.folder_itemid.isin(folders.folder_parentid)]
 
 #join child and father dataframes, to have both internal ids on a row
-folders = folders.set_index('parentid').join(folders2.set_index('itemid'),rsuffix='_parent')
-#folders_merge = pd.merge(folders,folders2,left_on='parentid',right_on='itemid',suffixes=('','_parent'))
-folders.parentid.fillna('',inplace=True)
+#folders = folders.set_index('parentid').join(folders2.set_index('itemid'),rsuffix='_parent')
+folders_tree = pd.merge(folders,folders2,left_on='folder_parentid',right_on='folder_itemid',suffixes=('','_parent'))
+folders_tree.folder_parentid.fillna('',inplace=True)
 
+asset_tree = (
+    folders_tree.assign(key=1)
+    .merge(host.assign(key=1), on="key")
+    .drop("key", axis=1))
 
 ##################REPORTS#########################
 reports = pbi.get_report_list()
 
-#create and populate a internal_id field, which is used to perform containment relationships
-for idx,row in reports.iterrows():
-    reports.at[idx,"internal_id"] = igc.internal_id
+#add a internal_id to all rows
+reports = labeler.label_dataframe(reports,field_prefix='report')
 
 #join child and father dataframes, to have both internal ids on a row
-reports = reports.set_index('parentid').join(folders.set_index('itemid'),rsuffix='_folder')
-reports.reset_index(inplace=True)
-folders.parentid.fillna('',inplace=True)
+#reports = reports.set_index('parentid').join(folders.set_index('itemid'),rsuffix='_folder')
+#reports.reset_index(inplace=True)
+#folders.parentid.fillna('',inplace=True)
+asset_tree = pd.merge(reports,asset_tree,left_on='report_parentid',right_on='folder_itemid')
 
 #################QUERIES##########################
 
-reports['metadata'] = np.vectorize(pqp.get_metadata)(reports['itemid'])
+#for each report, call the get_metadata fuction, to get query information from the .m scripts
+reports['metadata'] = np.vectorize(pqp.get_metadata)(reports['report_itemid'])
 
+#drop reports without queries from the queries dataframe
 metadata = reports.metadata.dropna().reset_index()
 
+#Join all lists from metadata column into a single list, then convert it into a dataframe
 metadata_list = []
 for row in metadata['metadata']:
     metadata_list.extend(row)
 
 queries = pd.DataFrame(metadata_list)
-
-for idx,row in queries.iterrows():
-    queries.at[idx,"internal_id"] = igc.internal_id
+queries = labeler.label_dataframe(queries,field_prefix='query')
 
 #join child and father dataframes, to have both internal ids on a row
-queries = queries.set_index('reportid').join(reports.set_index('itemid'),rsuffix='_report')
-queries.reset_index(inplace=True)
-#generate a query name
-queries.sort_values('level_0',inplace=True)
+asset_tree = pd.merge(queries,asset_tree,left_on='query_reportid',right_on='report_itemid')
+#queries = queries.set_index('reportid').join(reports.set_index('itemid'),rsuffix='_report')
+
+#Since a report may have multiple queries, generate a query name, enumerating each report query (Asset name is a must on IGC)
+#Also generating a query_id, since it does not have a native itemId from PowerBI
+asset_tree.sort_values('report_itemid',inplace=True)
+
 query_group = None
-for idx,row in queries.iterrows():
-    if row.level_0 != query_group:
+for idx,row in asset_tree.iterrows():
+    if row.report_itemid != query_group:
         query_counter = 1
-        query_group = row.level_0
-        row['name'] = "Query "+row['name']+" "+str(query_counter)
+        query_group = row.report_itemid
+        asset_tree.at[idx,'query_name'] = "Query "+row['report_name']+" "+str(query_counter)
+        #row['query_name'] = "Query "+row['report_name']+" "+str(query_counter)
+        asset_tree.at[idx,'query_id'] = idx
     else:
         query_counter += 1
-        row['name'] = "Query "+row['name']+" "+str(query_counter)
+        asset_tree.at[idx,'query_name'] = "Query "+row['report_name']+" "+str(query_counter)
+        asset_tree.at[idx,'query_id'] = idx
 
-#################TABLES AND COLUMNS##########################
-cols_frames = []
-for idx,row in queries.iterrows():
+#################QUERY ITEMS##########################
 
-    col_list,_,_ = pqp.parse_query(row.query)
-    colpd = pd.DataFrame(list(col_list),columns=['colname','table_alias','tablename'])
-    colpd['query_idx'] = idx
-    cols_frames.append(colpd)
+folders = asset_tree.filter(regex=("folder_")).drop_duplicates().reset_index(drop=True)
 
-columns_frame = pd.concat(cols_frames)
+folders.columns
 
-for idx,row in columns_frame.iterrows():
-    columns_frame.at[idx,"col_internal_id"] = igc.internal_id
 
-columns_frame = pd.merge(columns_frame,queries,left_on='query_idx',right_index=True)
+xml.new_asset_builder(asset_tree)
+
+item_rows = []
+for idx,row in asset_tree.iterrows():
+
+    items_list,_,_ = pqp.parse_query(row.query_content)
+    items = pd.DataFrame(list(items_list),columns=['item_name','item_table_alias','item_table_name'])
+    items['item_queryid'] = row.query_id
+    item_rows.append(items)
+
+items = pd.concat(item_rows)
+
+items = labeler.label_dataframe(items,field_prefix='item')
+
+asset_tree = pd.merge(items,asset_tree,left_on='item_queryid',right_on='query_id')
+
+xml_file = xml.new_asset_builder(asset_tree)
 
 # Step 6: Generate XML string with assets to be inserted
 xml_file = xml.build_asset_xml(host,hosts,folders,reports,queries,columns_frame)
@@ -141,5 +162,65 @@ xml_file = xml.build_asset_xml(host,hosts,folders,reports,queries,columns_frame)
 request = igc.insert_all_assets(xml_file)
 
 # Step 8: Generate XML string with lineage Information
+
+from lxml import etree
+
+#create doc
+doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
+
+
+
+#create assets section
+assets = etree.SubElement(doc,"assets")
+
+hosts
+
+#create host
+asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
+#append only the name attribute
+for idx,series in hosts.iterrows():
+        asset.append(etree.Element("attribute",{"name":"name","value":series['name']}))
+
+
+etree.tostring(doc)
+#create folder assets
+for idx,row in folders.iterrows():
+    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
+    #create folder attributes
+    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+    #create containment reference
+    if len(row.parentid) == 0:
+        asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
+    else:
+        asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
+
+#create report assets
+for idx,row in reports.iterrows():
+    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
+    #create report attributes
+    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+    #create containment reference
+    asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
+
+#create query assets
+for idx,row in queries.iterrows():
+    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiQuery","repr":row['name'],"ID":row.internal_id})
+    #create query attributes
+    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+    asset.append(etree.Element("attribute",{"name":"$query","value":row['query']}))
+    #create containment reference
+    asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":row.internal_id_report}))
+
+
+#create importAction
+importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
+
+
+
+with open('output/generated.xml','wb') as f:
+    f.write(etree.tostring(doc,pretty_print=True))
+
+xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
+
 
 # Step 9: Call Lineage information registration
