@@ -45,7 +45,7 @@ def append_host(parent_level,assets):
 
 def append_folders(parent_level,assets):
 
-    #get folders attributes, along with its containing class attributes
+    #get folders attributes
     folders = search_df(assets,"folder_")
 
     #create folder assets
@@ -64,7 +64,7 @@ def append_folders(parent_level,assets):
 
 def append_reports(parent_level,assets):
 
-    #get report attributes, along with its containing class attributes
+    #get report attributes
     reports = search_df(assets,"report_")
 
     #create report assets
@@ -78,13 +78,12 @@ def append_reports(parent_level,assets):
 
 def append_queries(parent_level,assets):
 
+    #get report attributes
     queries = search_df(assets,"query_")
     queries = queries[~queries['query_internal_id'].isna()]
 
     #create query assets
     for idx,row in queries.iterrows():
-        print(row.query_name)
-        print(row.query_internal_id)
         asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQuery","repr":row.query_name,"ID":row.query_internal_id})
         #create query attributes
         asset.append(etree.Element("attribute",{"name":"name","value":row.query_name}))
@@ -93,7 +92,19 @@ def append_queries(parent_level,assets):
         asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":assets.at[idx,'report_internal_id']}))
     return parent_level
 
-def append_query_items(parent_level,query_items):
+def append_query_items(parent_level,assets):
+
+    #get query items assets
+    items = search_df(assets,"item_")
+    items = items[~items['item_internal_id'].isna()]
+    #create item assets
+    for idx,row in items.iterrows():
+        asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQueryItem","repr":row.item_name,"ID":row.item_internal_id})
+        #create item attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row.item_name}))
+        #asset.append(etree.Element("attribute",{"name":"$query","value":row.item_content}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"$PbiQuery","assetIDs":assets.at[idx,'query_internal_id']}))
 
     return parent_level
 
@@ -109,8 +120,7 @@ def new_asset_builder(asset_tree):
     assets_level = append_folders(assets_level,asset_tree)
     assets_level = append_reports(assets_level,asset_tree)
     assets_level = append_queries(assets_level,asset_tree)
-
-    #assets_level = append_query_items(assets_le vel,query_items)
+    assets_level = append_query_items(assets_level,asset_tree)
 
     #create importAction
     importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
