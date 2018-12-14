@@ -38,6 +38,7 @@ def append_host(parent_level,assets):
     #create host
     asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiServer","repr":host.at[0,'host_name'],"ID":host.at[0,'host_internal_id']})
     #create host attributes
+    host = host.drop('host_internal_id',axis=1)
     for idx,series in host.iterrows():
         for column in series.keys():
             asset.append(etree.Element("attribute",{"name":column.split('host_')[1],"value":series[column]}))
@@ -66,6 +67,7 @@ def append_reports(parent_level,assets):
 
     #get report attributes
     reports = search_df(assets,"report_")
+    reports = reports[~reports['report_internal_id'].isna()]
 
     #create report assets
     for idx,row in reports.iterrows():
