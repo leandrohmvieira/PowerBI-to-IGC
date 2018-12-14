@@ -73,13 +73,15 @@ folders2 = folders[folders.folder_itemid.isin(folders.folder_parentid)]
 
 #join child and father dataframes, to have both internal ids on a row
 #folders = folders.set_index('parentid').join(folders2.set_index('itemid'),rsuffix='_parent')
-folders_tree = pd.merge(folders,folders2,left_on='folder_parentid',right_on='folder_itemid',suffixes=('','_parent'))
+folders_tree = pd.merge(folders,folders2,how='left',left_on='folder_parentid',right_on='folder_itemid',suffixes=('','_parent'))
+
 folders_tree.folder_parentid.fillna('',inplace=True)
 
 asset_tree = (
     folders_tree.assign(key=1)
     .merge(host.assign(key=1), on="key")
     .drop("key", axis=1))
+
 
 ##################REPORTS#########################
 reports = pbi.get_report_list()
@@ -91,7 +93,7 @@ reports = labeler.label_dataframe(reports,field_prefix='report')
 #reports = reports.set_index('parentid').join(folders.set_index('itemid'),rsuffix='_folder')
 #reports.reset_index(inplace=True)
 #folders.parentid.fillna('',inplace=True)
-asset_tree = pd.merge(reports,asset_tree,left_on='report_parentid',right_on='folder_itemid')
+asset_tree = pd.merge(reports,asset_tree,how='right',left_on='report_parentid',right_on='folder_itemid')
 
 #################QUERIES##########################
 
@@ -110,7 +112,7 @@ queries = pd.DataFrame(metadata_list)
 queries = labeler.label_dataframe(queries,field_prefix='query')
 
 #join child and father dataframes, to have both internal ids on a row
-asset_tree = pd.merge(queries,asset_tree,left_on='query_reportid',right_on='report_itemid')
+asset_tree = pd.merge(queries,asset_tree,how='right',left_on='query_reportid',right_on='report_itemid')
 #queries = queries.set_index('reportid').join(reports.set_index('itemid'),rsuffix='_report')
 
 #Since a report may have multiple queries, generate a query name, enumerating each report query (Asset name is a must on IGC)
@@ -118,7 +120,7 @@ asset_tree = pd.merge(queries,asset_tree,left_on='query_reportid',right_on='repo
 asset_tree.sort_values('report_itemid',inplace=True)
 
 query_group = None
-for idx,row in asset_tree.iterrows():
+for idx,row in asset_tree[~asset_tree['query_content'].isna()].iterrows():
     if row.report_itemid != query_group:
         query_counter = 1
         query_group = row.report_itemid
@@ -132,95 +134,99 @@ for idx,row in asset_tree.iterrows():
 
 #################QUERY ITEMS##########################
 
-folders = asset_tree.filter(regex=("folder_")).drop_duplicates().reset_index(drop=True)
-
-folders.columns
-
-
-xml.new_asset_builder(asset_tree)
+queries = xml.search_df(asset_tree,"query_")
+queries = queries[~queries['query_internal_id'].isna()]
 
 item_rows = []
-for idx,row in asset_tree.iterrows():
+for idx,row in queries.iterrows():
 
     items_list,_,_ = pqp.parse_query(row.query_content)
-    items = pd.DataFrame(list(items_list),columns=['item_name','item_table_alias','item_table_name'])
+    items = pd.DataFrame(list(items_list),columns=['item_table_name','item_table_alias','item_name'])
     items['item_queryid'] = row.query_id
     item_rows.append(items)
 
 items = pd.concat(item_rows)
+items = items.reset_index(drop=True)
 
 items = labeler.label_dataframe(items,field_prefix='item')
 
-asset_tree = pd.merge(items,asset_tree,left_on='item_queryid',right_on='query_id')
+asset_tree = pd.merge(asset_tree,items,how='left',left_on='query_id',right_on='item_queryid')
 
+
+# Step 6: Generate XML string with assets to be inserted
 xml_file = xml.new_asset_builder(asset_tree)
 
 # Step 6: Generate XML string with assets to be inserted
-xml_file = xml.build_asset_xml(host,hosts,folders,reports,queries,columns_frame)
+#xml_file = xml.build_asset_xml(asset_tree)
 
 # Step 7: Call asset insert request
 request = igc.insert_all_assets(xml_file)
 
+request.text
+
+['folder_internal_id','report_internal_id','query_internal_id','item_internal_id']
+asset_tree[asset_tree['item_internal_id'] in ['a659','a665']]
+
 # Step 8: Generate XML string with lineage Information
-
-from lxml import etree
-
-#create doc
-doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
-
-
-
-#create assets section
-assets = etree.SubElement(doc,"assets")
-
-hosts
-
-#create host
-asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
-#append only the name attribute
-for idx,series in hosts.iterrows():
-        asset.append(etree.Element("attribute",{"name":"name","value":series['name']}))
-
-
-etree.tostring(doc)
-#create folder assets
-for idx,row in folders.iterrows():
-    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
-    #create folder attributes
-    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-    #create containment reference
-    if len(row.parentid) == 0:
-        asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
-    else:
-        asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
-
-#create report assets
-for idx,row in reports.iterrows():
-    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
-    #create report attributes
-    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-    #create containment reference
-    asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
-
-#create query assets
-for idx,row in queries.iterrows():
-    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiQuery","repr":row['name'],"ID":row.internal_id})
-    #create query attributes
-    asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-    asset.append(etree.Element("attribute",{"name":"$query","value":row['query']}))
-    #create containment reference
-    asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":row.internal_id_report}))
-
-
-#create importAction
-importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
-
-
-
-with open('output/generated.xml','wb') as f:
-    f.write(etree.tostring(doc,pretty_print=True))
-
-xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
-
-
-# Step 9: Call Lineage information registration
+#
+# from lxml import etree
+#
+# #create doc
+# doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
+#
+#
+#
+# #create assets section
+# assets = etree.SubElement(doc,"assets")
+#
+# hosts
+#
+# #create host
+# asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
+# #append only the name attribute
+# for idx,series in hosts.iterrows():
+#         asset.append(etree.Element("attribute",{"name":"name","value":series['name']}))
+#
+#
+# etree.tostring(doc)
+# #create folder assets
+# for idx,row in folders.iterrows():
+#     asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
+#     #create folder attributes
+#     asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+#     #create containment reference
+#     if len(row.parentid) == 0:
+#         asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
+#     else:
+#         asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
+#
+# #create report assets
+# for idx,row in reports.iterrows():
+#     asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
+#     #create report attributes
+#     asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+#     #create containment reference
+#     asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
+#
+# #create query assets
+# for idx,row in queries.iterrows():
+#     asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiQuery","repr":row['name'],"ID":row.internal_id})
+#     #create query attributes
+#     asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
+#     asset.append(etree.Element("attribute",{"name":"$query","value":row['query']}))
+#     #create containment reference
+#     asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":row.internal_id_report}))
+#
+#
+# #create importAction
+# importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
+#
+#
+#
+# with open('output/generated.xml','wb') as f:
+#     f.write(etree.tostring(doc,pretty_print=True))
+#
+# xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
+#
+#
+# # Step 9: Call Lineage information registration
