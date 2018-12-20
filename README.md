@@ -35,7 +35,7 @@ This app is still on development and is not ready to be used yet, BUT, you can d
 
 * V0.3 (ready) - Ability to ingest and show queries from power BI made on DB2 only
 
-* V0.4 (waiting sponsors) - Get metadata from more sources, and add data lineage support
+* V0.4 (in development) - Get metadata from more sources, and add data lineage support
 
 ## Contributing
 
