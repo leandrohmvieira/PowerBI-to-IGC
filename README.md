@@ -11,6 +11,7 @@ The Power BI bundle hierarchy is defined as:
     * Power BI Folder(Folder is a self containable class)
       * Power BI Report
         * Power BI Query
+          * Power BI Query Item
 
 
 ## How to use this Application
