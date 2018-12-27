@@ -34,7 +34,7 @@ class PbiServer:
             print("{}% completed".format(int(100 * float(report.Index+1)/float(reports.shape[0]))))
             os.sys.stdout.write('\r')
             #download report into reports Folder
-            report_content = pd.read_sql_query(report_content_query,self.connection,params=[report.itemid])
+            report_content = pd.read_sql_query(report_content_query,self.connection,params=[report.report_itemid])
             input_filename = repository.reports+report.report_itemid+".pbix"
             with open(input_filename, "wb") as pbix_file:
                 pbix_file.write(report_content['BinaryContent'][0])
