@@ -1,8 +1,11 @@
 # .env file contains sensitive information
 .env*
 
-# input folder have data downloaded and transformed from pbi Report Server
-input/*
+# report folder contains the pbix files downloaded from pbi server
+input/reports/*.pbix
+
+# metadata folder contains the .m script files extracted from pbix files
+input/metadata/*.m
 
 # output folder have the files to be imported by IGC
 output/*
