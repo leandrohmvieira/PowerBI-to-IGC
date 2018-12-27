@@ -36,7 +36,7 @@ class Repository:
 
     def extract_pbi_queries(self):
 
-        for file in glob.glob(self.reports+'*'):
+        for file in glob.glob(self.reports+'*.pbix'):
 
             input_filename = file
             zip_ref = zipfile.ZipFile(input_filename, 'r')
