@@ -30,7 +30,7 @@ class id_generator:
 def search_df(dataframe,regex):
     return dataframe.filter(regex=regex).drop_duplicates()
 
-def append_host(parent_level,assets):
+def append_host(parent_level,assets,only_name=False):
 
     #get host attributes from asset_tree
     host = search_df(assets,'^host_').reset_index(drop=True)
@@ -38,11 +38,17 @@ def append_host(parent_level,assets):
     #create host
     asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiServer","repr":host.at[0,'host_name'],"ID":host.at[0,'host_internal_id']})
     #create host attributes
-    host = host.drop('host_internal_id',axis=1)
-    for idx,series in host.iterrows():
-        for column in series.keys():
-            asset.append(etree.Element("attribute",{"name":column.split('host_')[1],"value":series[column]}))
-    return parent_level
+
+    if only_name:
+        host = host.drop('host_internal_id',axis=1)
+        for idx,series in host.iterrows():
+            for column in series.keys():
+                asset.append(etree.Element("attribute",{"name":column.split('host_')[1],"value":series[column]}))
+    else:
+        for idx,row in host.iterrows():
+            asset.append(etree.Element("attribute",{"name":"name","value":row.host_name}))
+
+        return parent_level
 
 def append_folders(parent_level,assets):
 
@@ -134,7 +140,7 @@ def new_asset_builder(asset_tree):
     return xml
 
 
-def build_asset_xml(host,hosts,folders,reports,queries,columns):
+def build_flow_xml(asset_tree):
 
     #create doc
     doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
