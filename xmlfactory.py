@@ -101,9 +101,9 @@ def append_query_items(parent_level,assets):
     items = items[~items['item_internal_id'].isna()]
     #create item assets
     for idx,row in items.iterrows():
-        asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQueryItem","repr":row.item_name,"ID":row.item_internal_id})
+        asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQueryItem","repr":row.item_table_name+'.'+row.item_name,"ID":row.item_internal_id})
         #create item attributes
-        asset.append(etree.Element("attribute",{"name":"name","value":row.item_name}))
+        asset.append(etree.Element("attribute",{"name":"name","value":row.item_table_name+'.'+row.item_name}))
         #asset.append(etree.Element("attribute",{"name":"$query","value":row.item_content}))
         #create containment reference
         asset.append(etree.Element("reference",{"name":"$PbiQuery","assetIDs":assets.at[idx,'query_internal_id']}))
