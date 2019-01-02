@@ -40,13 +40,14 @@ def append_host(parent_level,assets,only_name=False):
     #create host attributes
 
     if only_name:
+        for idx,row in host.iterrows():
+            asset.append(etree.Element("attribute",{"name":"name","value":row.host_name}))
+
+    else:
         host = host.drop('host_internal_id',axis=1)
         for idx,series in host.iterrows():
             for column in series.keys():
                 asset.append(etree.Element("attribute",{"name":column.split('host_')[1],"value":series[column]}))
-    else:
-        for idx,row in host.iterrows():
-            asset.append(etree.Element("attribute",{"name":"name","value":row.host_name}))
 
         return parent_level
 
