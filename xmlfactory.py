@@ -49,9 +49,9 @@ def append_host(parent_level,assets,only_name=False):
             for column in series.keys():
                 asset.append(etree.Element("attribute",{"name":column.split('host_')[1],"value":series[column]}))
 
-        return parent_level
+    return parent_level
 
-def append_folders(parent_level,assets):
+def append_folders(parent_level,assets,only_name=False):
 
     #get folders attributes
     folders = search_df(assets,"folder_")
@@ -70,7 +70,7 @@ def append_folders(parent_level,assets):
             asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.folder_internal_id_parent}))
     return parent_level
 
-def append_reports(parent_level,assets):
+def append_reports(parent_level,assets,only_name=False):
 
     #get report attributes
     reports = search_df(assets,"report_")
@@ -85,23 +85,31 @@ def append_reports(parent_level,assets):
         asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":assets.at[idx,"folder_internal_id"]}))
     return parent_level
 
-def append_queries(parent_level,assets):
+def append_queries(parent_level,assets,only_name=False):
 
     #get report attributes
     queries = search_df(assets,"query_")
     queries = queries[~queries['query_internal_id'].isna()]
 
     #create query assets
-    for idx,row in queries.iterrows():
-        asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQuery","repr":row.query_name,"ID":row.query_internal_id})
-        #create query attributes
-        asset.append(etree.Element("attribute",{"name":"name","value":row.query_name}))
-        asset.append(etree.Element("attribute",{"name":"$query","value":row.query_content}))
-        #create containment reference
-        asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":assets.at[idx,'report_internal_id']}))
+    if only_name:
+        for idx,row in queries.iterrows():
+            asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQuery","repr":row.query_name,"ID":row.query_internal_id})
+            #create query attributes
+            asset.append(etree.Element("attribute",{"name":"name","value":row.query_name}))
+            #create containment reference
+            asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":assets.at[idx,'report_internal_id']}))
+    else:
+        for idx,row in queries.iterrows():
+            asset = etree.SubElement(parent_level,"asset",{"class":"$PowerBI-PbiQuery","repr":row.query_name,"ID":row.query_internal_id})
+            #create query attributes
+            asset.append(etree.Element("attribute",{"name":"name","value":row.query_name}))
+            asset.append(etree.Element("attribute",{"name":"$query","value":row.query_content}))
+            #create containment reference
+            asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":assets.at[idx,'report_internal_id']}))
     return parent_level
 
-def append_query_items(parent_level,assets):
+def append_query_items(parent_level,assets,only_name=False):
 
     #get query items assets
     items = search_df(assets,"item_")
