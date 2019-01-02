@@ -16,9 +16,9 @@ The Power BI bundle hierarchy is defined as:
 
 ## How to use this Application
 
-This app is still on development and is not ready to be used yet, BUT, you can download release 0.1, that contains a CSV generator, which creates a file that can be imported using IGC CSV bridge.
+This app is still on development and is not ready to production environment yet, if you want to give it a go, please get a release package, not the last from master.
 
-# Using Script(v0.1)
+# Using this application:
 
 * First, if you haven't, [install ODBC Driver 13 for SQL Server](https://www.microsoft.com/en-us/download/details.aspx?id=53339)
 
@@ -33,10 +33,12 @@ This app is still on development and is not ready to be used yet, BUT, you can d
 
 * V0.2 - Application will register a bundle on OpenIGC, and will add all folders and reports under the custom bundle
 
-* V0.3 (ready) - Ability to ingest and show queries from power BI made on DB2 only
+* V0.3 - Ability to ingest and show queries from power BI made on DB2 only
 
-* V0.4 (in development) - Get metadata from more sources, and add data lineage support
+* V0.4 - App able to get metadata at column level from queries, but column naming still a little wonky though
+
+* V0.5(DEV) - Data Lineage support
 
 ## Contributing
 
-This is a open source project and i welcome any contributions, please feel free to reach me if you want to join this project
+This is a open source project and i welcome any contributions, please feel free to reach me at leandrohmvieira@gmail.com if you want to join this project
