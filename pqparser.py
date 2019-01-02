@@ -31,6 +31,9 @@ then returns the metadata found.
 """
 def get_metadata(itemid):
     #only compatible with DB2 yet
+
+    itemid = '1BBF5323-8E67-41D9-A5E1-AF518F989882'
+
     if has_db2_sources(itemid):
         #open report .m script
         file = open('input/metadata/'+itemid+'.m','r',encoding='utf-8').read()
@@ -45,8 +48,8 @@ def get_metadata(itemid):
 
         #change the variables aliases to the real variables values
         for vars in metadata:
-            vars.update({'query_host':variables.get(vars.get('host'))})
-            vars.update({'query_database':variables.get(vars.get('database'))})
+            vars.update({'query_host':variables.get(vars.get('query_host'))})
+            vars.update({'query_database':variables.get(vars.get('query_database'))})
             vars.update({'query_reportid':itemid})
         return metadata
     else:
