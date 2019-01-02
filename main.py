@@ -162,10 +162,17 @@ xml_file = xml.new_asset_builder(asset_tree)
 # Step 7: Call asset insert request
 request = igc.insert_all_assets(xml_file)
 
+#request.url
+
 request.text
 
-['folder_internal_id','report_internal_id','query_internal_id','item_internal_id']
-asset_tree[asset_tree['item_internal_id'] in ['a659','a665']]
+#['folder_internal_id','report_internal_id','query_internal_id','item_internal_id']
+
+#asset_tree[asset_tree['item_internal_id'].isin(['a950','a962'])][['folder_internal_id','report_internal_id','query_internal_id','item_internal_id']]
+
+#asset_tree[asset_tree['item_internal_id'].isin(['a764','a787'])].filter(regex='item_')
+
+#asset_tree[asset_tree['item_internal_id'].isin(['a950','a962'])]
 
 # Step 8: Generate XML string with lineage Information
 #
