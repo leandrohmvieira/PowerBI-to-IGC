@@ -142,7 +142,7 @@ def append_database_host(parent_level,assets):
         #remove port from host if it have one
         hostname = row.query_host.split(':')[0]
 
-        asset = etree.SubElement(parent_level,"asset",{"class":"host","repr":hostname,"ID":"e1"}) # FIXME: Generate THIS ID DINAMICALLY LATER
+        asset = etree.SubElement(parent_level,"asset",{"class":"host","repr":hostname,"ID":row.query_host_internal_id}) # FIXME: Generate THIS ID DINAMICALLY LATER
         #create database host attributes
         asset.append(etree.Element("attribute",{"name":"name","value":hostname}))
     	# <asset class="host" repr="bdb2p04.plexbsb.bb.com.br" ID="e1">
@@ -161,6 +161,23 @@ def append_database_instances(parent_level,assets):
         asset = etree.SubElement(parent_level,"asset",{"class":"database","repr":row.query_database,"ID":row.query_database_internal_id})
         #create database attributes
         asset.append(etree.Element("attribute",{"name":"name","value":row.query_database}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"host","assetIDs":assets.at[idx,'query_host_internal_id']}))
+
+    return parent_level
+
+def append_database_schemas(parent_level,assets):
+
+    schemas = search_df(assets,"item_table_schema")
+    schemas = schemas[~schemas['item_table_schema'].isna()]
+
+    for idx,row in schemas.iterrows():
+
+        asset = etree.SubElement(parent_level,"asset",{"class":"database_schema","repr":row.item_table_schema,"ID":row.item_table_schema_internal_id})
+        #create schema attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row.item_table_schema}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"database","assetIDs":assets.at[idx,'query_database_internal_id']}))
 
     return parent_level
 
