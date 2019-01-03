@@ -96,7 +96,7 @@ def parse_query(sql_str):
         if '.' in tablename:
             for tok in tokens:
                 if alias+"." in tok:
-                    columns.add((tablename,alias,tok.split(".")[1]))
+                    columns.add((tablename.split('.')[0],tablename,alias,tok.split(".")[1]))
                 else:
                     continue
         else:
