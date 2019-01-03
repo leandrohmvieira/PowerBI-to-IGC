@@ -142,7 +142,7 @@ def append_database_host(parent_level,assets):
         #remove port from host if it have one
         hostname = row.query_host.split(':')[0]
 
-        asset = etree.SubElement(parent_level,"asset",{"class":"host","repr":hostname,"ID":row.query_host_internal_id}) # FIXME: Generate THIS ID DINAMICALLY LATER
+        asset = etree.SubElement(parent_level,"asset",{"class":"host","repr":hostname,"ID":row.query_host_internal_id})
         #create database host attributes
         asset.append(etree.Element("attribute",{"name":"name","value":hostname}))
     	# <asset class="host" repr="bdb2p04.plexbsb.bb.com.br" ID="e1">
