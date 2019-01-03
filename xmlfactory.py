@@ -27,8 +27,15 @@ class id_generator:
             dataframe.at[idx,field_prefix+"_internal_id"] = self.internal_id
         return dataframe
 
-def search_df(dataframe,regex):
-    return dataframe.filter(regex=regex).drop_duplicates()
+def search_df(dataframe,regex,dropna=False,dropon=None):
+
+    frame = dataframe.filter(regex=regex).drop_duplicates()
+
+    if dropna:
+        frame = frame[~frame[dropon].isna()]
+
+    return frame
+
 
 def append_host(parent_level,assets,only_name=False):
 
@@ -73,8 +80,8 @@ def append_folders(parent_level,assets,only_name=False):
 def append_reports(parent_level,assets,only_name=False):
 
     #get report attributes
-    reports = search_df(assets,"report_")
-    reports = reports[~reports['report_internal_id'].isna()]
+    reports = search_df(assets,"report_",dropna=True,dropon='report_internal_id')
+    #reports = reports[~reports['report_internal_id'].isna()]
 
     #create report assets
     for idx,row in reports.iterrows():
@@ -141,6 +148,19 @@ def append_database_host(parent_level,assets):
     	# <asset class="host" repr="bdb2p04.plexbsb.bb.com.br" ID="e1">
 		# 	<attribute name="name" value="bdb2p04.plexbsb.bb.com.br"/>
 		# </asset>
+
+    return parent_level
+
+def append_database_instances(parent_level,assets):
+
+    databases = search_df(assets,"query_database")
+    databases = databases[~databases['query_database'].isna()]
+
+    for idx,row in databases.iterrows():
+
+        asset = etree.SubElement(parent_level,"asset",{"class":"database","repr":row.query_database,"ID":row.query_database_internal_id})
+        #create database attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row.query_database}))
 
     return parent_level
 
