@@ -125,6 +125,25 @@ def append_query_items(parent_level,assets,only_name=False):
 
     return parent_level
 
+def append_database_host(parent_level,assets):
+
+    db_host = search_df(assets,"query_host")
+    db_host = db_host[~db_host['query_host'].isna()]
+
+    for idx,row in db_host.iterrows():
+
+        #remove port from host if it have one
+        hostname = row.query_host.split(':')[0]
+
+        asset = etree.SubElement(parent_level,"asset",{"class":"host","repr":hostname,"ID":"e1"}) # FIXME: Generate THIS ID DINAMICALLY LATER
+        #create database host attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":hostname}))
+    	# <asset class="host" repr="bdb2p04.plexbsb.bb.com.br" ID="e1">
+		# 	<attribute name="name" value="bdb2p04.plexbsb.bb.com.br"/>
+		# </asset>
+
+    return parent_level
+
 def new_asset_builder(asset_tree):
 
     #create doc
@@ -138,58 +157,6 @@ def new_asset_builder(asset_tree):
     assets_level = append_reports(assets_level,asset_tree)
     assets_level = append_queries(assets_level,asset_tree)
     assets_level = append_query_items(assets_level,asset_tree)
-
-    #create importAction
-    importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
-
-    with open('output/generated.xml','wb') as f:
-        f.write(etree.tostring(doc,pretty_print=True))
-
-    xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
-    return xml
-
-
-def build_flow_xml(asset_tree):
-
-    #create doc
-    doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
-    #create assets
-    assets = etree.SubElement(doc,"assets")
-    #create host
-    asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
-    #create host attributes
-    for idx,series in hosts.iterrows():
-        for column in series.keys():
-            asset.append(etree.Element("attribute",{"name":column,"value":series[column]}))
-
-    #create folder assets
-    for idx,row in folders.iterrows():
-        asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
-        #create folder attributes
-        asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-        #create containment reference
-        if len(row.parentid) == 0:
-            asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
-        else:
-            asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
-
-    #create report assets
-    for idx,row in reports.iterrows():
-        asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
-        #create report attributes
-        asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-        #create containment reference
-        asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
-
-    #create query assets
-    for idx,row in queries.iterrows():
-        asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiQuery","repr":row['name'],"ID":row.internal_id})
-        #create query attributes
-        asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-        asset.append(etree.Element("attribute",{"name":"$query","value":row['query']}))
-        #create containment reference
-        asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":row.internal_id_report}))
-
 
     #create importAction
     importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
