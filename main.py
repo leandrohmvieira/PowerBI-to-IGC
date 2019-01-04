@@ -38,10 +38,10 @@ r = igc.delete_bundle()
 result = igc.register_bundle(repo)
 
 # Step 3: Download Power BI db2_reports
-pbi.download_all_reports(repo)
+#pbi.download_all_reports(repo)
 
 # Step 4: Extract the M scripts of all reports
-repo.extract_pbi_queries()
+#repo.extract_pbi_queries()
 
 # Step 5: Generate a pandas dataframe for hosts, folders, reports, Queries and query items
 
@@ -141,8 +141,9 @@ item_rows = []
 for idx,row in queries.iterrows():
 
     items_list,_,_ = pqp.parse_query(row.query_content)
-    items = pd.DataFrame(list(items_list),columns=['item_table_name','item_table_alias','item_name'])
+    items = pd.DataFrame(list(items_list),columns=['item_table_schema','item_table_name','item_table_alias','item_name'])
     items['item_queryid'] = row.query_id
+    #items['item_table_schema'] = items['item_table_name'].split('.')[0]
     item_rows.append(items)
 
 items = pd.concat(item_rows)
@@ -152,19 +153,14 @@ items = labeler.label_dataframe(items,field_prefix='item')
 
 asset_tree = pd.merge(asset_tree,items,how='left',left_on='query_id',right_on='item_queryid')
 
-
 # Step 6: Generate XML string with assets to be inserted
-xml_file = xml.new_asset_builder(asset_tree)
+#xml_file = xml.new_asset_builder(asset_tree)
 
 # Step 6: Generate XML string with assets to be inserted
 #xml_file = xml.build_asset_xml(asset_tree)
 
 # Step 7: Call asset insert request
-request = igc.insert_all_assets(xml_file)
-
-#request.url
-
-request.text
+#request = igc.insert_all_assets(xml_file)
 
 #['folder_internal_id','report_internal_id','query_internal_id','item_internal_id']
 
@@ -174,66 +170,71 @@ request.text
 
 #asset_tree[asset_tree['item_internal_id'].isin(['a950','a962'])]
 
+
 # Step 8: Generate XML string with lineage Information
-#
-# from lxml import etree
-#
-# #create doc
-# doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
-#
-#
-#
-# #create assets section
-# assets = etree.SubElement(doc,"assets")
-#
-# hosts
-#
-# #create host
-# asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiServer","repr":os.getenv("SERVER"),"ID":host[0]['internal_id']})
-# #append only the name attribute
-# for idx,series in hosts.iterrows():
-#         asset.append(etree.Element("attribute",{"name":"name","value":series['name']}))
-#
-#
-# etree.tostring(doc)
-# #create folder assets
-# for idx,row in folders.iterrows():
-#     asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiFolder","repr":row['name'],"ID":row.internal_id})
-#     #create folder attributes
-#     asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-#     #create containment reference
-#     if len(row.parentid) == 0:
-#         asset.append(etree.Element("reference",{"name":"$PbiServer","assetIDs":host[0]['internal_id']}))
-#     else:
-#         asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_parent}))
-#
-# #create report assets
-# for idx,row in reports.iterrows():
-#     asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiReport","repr":row['name'],"ID":row.internal_id})
-#     #create report attributes
-#     asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-#     #create containment reference
-#     asset.append(etree.Element("reference",{"name":"$PbiFolder","assetIDs":row.internal_id_folder}))
-#
-# #create query assets
-# for idx,row in queries.iterrows():
-#     asset = etree.SubElement(assets,"asset",{"class":"$PowerBI-PbiQuery","repr":row['name'],"ID":row.internal_id})
-#     #create query attributes
-#     asset.append(etree.Element("attribute",{"name":"name","value":row['name']}))
-#     asset.append(etree.Element("attribute",{"name":"$query","value":row['query']}))
-#     #create containment reference
-#     asset.append(etree.Element("reference",{"name":"$PbiReport","assetIDs":row.internal_id_report}))
-#
-#
-# #create importAction
-# importAction = etree.SubElement(doc,"importAction",{"partialAssetIDs":"a1"})
-#
-#
-#
-# with open('output/generated.xml','wb') as f:
-#     f.write(etree.tostring(doc,pretty_print=True))
-#
-# xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
-#
-#
-# # Step 9: Call Lineage information registration
+
+# To generate lineage information its necessary to build the entire database asset tree and label them with an internal_id, *sigh*
+
+
+db_labeler = xml.id_generator(prefix='e')
+
+def generate_db_ids(asset_tree,id_generator,field):
+
+    field_frame = xml.search_df(asset_tree,field,dropna=True,dropon=field)
+    field_frame = db_labeler.label_dataframe(field_frame,field)
+    asset_tree = pd.merge(asset_tree,field_frame,how='left',left_on=field,right_on=field,suffixes=('','_database'))
+
+    return asset_tree
+
+#labeling database hosts
+
+asset_tree = generate_db_ids(asset_tree,db_labeler,'query_host')
+
+#labeling database instances
+
+asset_tree = generate_db_ids(asset_tree,db_labeler,'query_database')
+
+#labeling database schemas
+
+asset_tree = generate_db_ids(asset_tree,db_labeler,'item_table_schema')
+
+#labeling database tables
+
+asset_tree = generate_db_ids(asset_tree,db_labeler,'item_table_name')
+
+#labeling database columns
+
+asset_tree = generate_db_ids(asset_tree,db_labeler,'item_name')
+
+
+from lxml import etree
+
+doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
+#create assets
+assets_level = etree.SubElement(doc,"assets")
+
+#append all assets as children to the assets xml node
+# assets_level = xml.append_host(assets_level,asset_tree,only_name=True)
+# assets_level = xml.append_folders(assets_level,asset_tree,only_name=True)
+# assets_level = xml.append_reports(assets_level,asset_tree,only_name=True)
+# assets_level = xml.append_queries(assets_level,asset_tree,only_name=True)
+#assets_level = xml.append_query_items(assets_level,asset_tree,only_name=True)
+assets_level = xml.append_database_host(assets_level,asset_tree)
+assets_level = xml.append_database_instances(assets_level,asset_tree)
+assets_level = xml.append_database_schemas(assets_level,asset_tree)
+assets_level = xml.append_database_tables(assets_level,asset_tree)
+assets_level = xml.append_database_columns(assets_level,asset_tree)
+
+etree.tostring(doc,pretty_print=True)
+
+asset_tree.columns
+
+teste = 'penis'
+
+teste.split(':')[0]
+
+
+#assets_level = append_folders(assets_level,asset_tree)
+#assets_level = append_reports(assets_level,asset_tree)
+#assets_level = append_queries(assets_level,asset_tree)
+#assets_level = append_query_items(assets_level,asset_tree)
