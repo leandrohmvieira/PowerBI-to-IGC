@@ -181,6 +181,36 @@ def append_database_schemas(parent_level,assets):
 
     return parent_level
 
+def append_database_tables(parent_level,assets):
+
+    tables = search_df(assets,"item_table_name")
+    tables = tables[~tables['item_table_name'].isna()]
+
+    for idx,row in tables.iterrows():
+
+        asset = etree.SubElement(parent_level,"asset",{"class":"database_table","repr":row.item_table_name,"ID":row.item_table_name_internal_id})
+        #create schema attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row.item_table_name}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"database","assetIDs":assets.at[idx,'item_table_schema_internal_id']}))
+
+    return parent_level
+
+def append_database_columns(parent_level,assets):
+
+    columns = search_df(assets,"item_name")
+    columns = columns[~columns['item_name'].isna()]
+
+    for idx,row in columns.iterrows():
+
+        asset = etree.SubElement(parent_level,"asset",{"class":"database_column","repr":row.item_name,"ID":row.item_table_schema_internal_id})
+        #create schema attributes
+        asset.append(etree.Element("attribute",{"name":"name","value":row.item_table_schema}))
+        #create containment reference
+        asset.append(etree.Element("reference",{"name":"database","assetIDs":assets.at[idx,'query_database_internal_id']}))
+
+    return parent_level
+
 def new_asset_builder(asset_tree):
 
     #create doc
