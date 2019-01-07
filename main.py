@@ -29,13 +29,13 @@ load_dotenv(find_dotenv())
 #Create objects to manipulate the PbiServer, local repository and IGC rest api
 pbi = powerapi.PbiServer()
 repo = Repository()
-igc = igc()
+#igc = igc()
 
 # Step 1: truncate all objects (temporary)
-r = igc.delete_bundle()
+#r = igc.delete_bundle()
 
 # Step 2: Register bundle
-result = igc.register_bundle(repo)
+#result = igc.register_bundle(repo)
 
 # Step 3: Download Power BI db2_reports
 #pbi.download_all_reports(repo)
@@ -225,14 +225,25 @@ assets_level = xml.append_database_schemas(assets_level,asset_tree)
 assets_level = xml.append_database_tables(assets_level,asset_tree)
 assets_level = xml.append_database_columns(assets_level,asset_tree)
 
+#now with the assets appended, its time to declare their relationships
+
+flow_level = etree.SubElement(doc,"flowUnits")
+
+#lets try to build query items lineage
+
+
+
+items = xml.search_df(asset_tree,"item_")
+items = items[~items['item_internal_id'].isna()]
+#create item assets
+for idx,row in items.iterrows():
+    flow_unit = etree.SubElement(flow_level,"flowUnit",{"assetID":row.item_internal_id})
+
+    subFlow = etree.SubElement(flow_unit,"subFlows",{"flowType":"SYSTEM","comment":"grupo de linhagem da coluna "+row.item_name })
+
+    subFlow_unit = etree.SubElement(subFlow,"flow",{"sourceIDs":row.item_name_internal_id,"targetIDs":row.item_internal_id,"comment":"unidade de linhagem da coluna "+row.item_name})
+
 etree.tostring(doc,pretty_print=True)
-
-asset_tree.columns
-
-teste = 'penis'
-
-teste.split(':')[0]
-
 
 #assets_level = append_folders(assets_level,asset_tree)
 #assets_level = append_reports(assets_level,asset_tree)
