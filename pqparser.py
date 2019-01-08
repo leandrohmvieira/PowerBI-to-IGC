@@ -32,8 +32,6 @@ then returns the metadata found.
 def get_metadata(itemid):
     #only compatible with DB2 yet
 
-    itemid = '1BBF5323-8E67-41D9-A5E1-AF518F989882'
-
     if has_db2_sources(itemid):
         #open report .m script
         file = open('input/metadata/'+itemid+'.m','r',encoding='utf-8').read()
