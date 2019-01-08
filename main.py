@@ -29,13 +29,13 @@ load_dotenv(find_dotenv())
 #Create objects to manipulate the PbiServer, local repository and IGC rest api
 pbi = powerapi.PbiServer()
 repo = Repository()
-#igc = igc()
+igc = igc()
 
 # Step 1: truncate all objects (temporary)
-#r = igc.delete_bundle()
+r = igc.delete_bundle()
 
 # Step 2: Register bundle
-#result = igc.register_bundle(repo)
+result = igc.register_bundle(repo)
 
 # Step 3: Download Power BI db2_reports
 #pbi.download_all_reports(repo)
@@ -132,6 +132,8 @@ for idx,row in asset_tree[~asset_tree['query_content'].isna()].iterrows():
         asset_tree.at[idx,'query_name'] = "Query "+row['report_name']+" "+str(query_counter)
         asset_tree.at[idx,'query_id'] = idx
 
+asset_tree[~asset_tree.query_name.isna()]
+
 #################QUERY ITEMS##########################
 
 queries = xml.search_df(asset_tree,"query_")
@@ -154,13 +156,13 @@ items = labeler.label_dataframe(items,field_prefix='item')
 asset_tree = pd.merge(asset_tree,items,how='left',left_on='query_id',right_on='item_queryid')
 
 # Step 6: Generate XML string with assets to be inserted
-#xml_file = xml.new_asset_builder(asset_tree)
+xml_file = xml.new_asset_builder(asset_tree)
 
 # Step 6: Generate XML string with assets to be inserted
 #xml_file = xml.build_asset_xml(asset_tree)
 
 # Step 7: Call asset insert request
-#request = igc.insert_all_assets(xml_file)
+request = igc.insert_all_assets(xml_file)
 
 #['folder_internal_id','report_internal_id','query_internal_id','item_internal_id']
 
@@ -214,11 +216,11 @@ doc = etree.Element("doc",{"xmlns":"http://www.ibm.com/iis/flow-doc"})
 assets_level = etree.SubElement(doc,"assets")
 
 #append all assets as children to the assets xml node
-# assets_level = xml.append_host(assets_level,asset_tree,only_name=True)
-# assets_level = xml.append_folders(assets_level,asset_tree,only_name=True)
-# assets_level = xml.append_reports(assets_level,asset_tree,only_name=True)
-# assets_level = xml.append_queries(assets_level,asset_tree,only_name=True)
-#assets_level = xml.append_query_items(assets_level,asset_tree,only_name=True)
+assets_level = xml.append_host(assets_level,asset_tree,only_name=True)
+assets_level = xml.append_folders(assets_level,asset_tree,only_name=True)
+assets_level = xml.append_reports(assets_level,asset_tree,only_name=True)
+assets_level = xml.append_queries(assets_level,asset_tree,only_name=True)
+assets_level = xml.append_query_items(assets_level,asset_tree,only_name=True)
 assets_level = xml.append_database_host(assets_level,asset_tree)
 assets_level = xml.append_database_instances(assets_level,asset_tree)
 assets_level = xml.append_database_schemas(assets_level,asset_tree)
@@ -231,8 +233,6 @@ flow_level = etree.SubElement(doc,"flowUnits")
 
 #lets try to build query items lineage
 
-
-
 items = xml.search_df(asset_tree,"item_")
 items = items[~items['item_internal_id'].isna()]
 #create item assets
@@ -244,6 +244,14 @@ for idx,row in items.iterrows():
     subFlow_unit = etree.SubElement(subFlow,"flow",{"sourceIDs":row.item_name_internal_id,"targetIDs":row.item_internal_id,"comment":"unidade de linhagem da coluna "+row.item_name})
 
 etree.tostring(doc,pretty_print=True)
+
+with open('output/lineage_generated.xml','wb') as f:
+    f.write(etree.tostring(doc,pretty_print=True))
+
+xml = etree.tostring(doc, pretty_print=True).decode('UTF-8')
+
+reqli = igc.insert_lineage_data(xml)
+
 
 #assets_level = append_folders(assets_level,asset_tree)
 #assets_level = append_reports(assets_level,asset_tree)
