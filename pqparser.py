@@ -5,8 +5,8 @@ parse M Scripts to verify which databases are being acessed
 
 import re
 
-get_variables = re.compile('shared (\w+) = \"([\w.:]+)\"') # 2 groups, first group is variable name and the second is variable value
-get_sources = re.compile('DB2\.Database\W*\((\w+)\W+(\w+)[\s\S]+?Query=\"([\s\S]+?)\"') # 3 groups, host variable, database variable, and Query executed
+get_variables = re.compile('shared (\w+) = \"([\w\-\.\:]+)\"') # 2 groups, first group is variable name and the second is variable value
+get_sources = re.compile('DB2\.Database\W*\(\W*([\w\-\.\:]+)\W+(\w+)[\s\S]+?Query=\"([\s\S]+?)\"') # 3 groups, host variable, database variable, and Query executed
 get_query_from_tables = re.compile('FROM\s+(\w+)\.(\w+)') # 2 groups, schema and name of all tables right after a FROM keyword
 get_query_join_tables = re.compile('JOIN\s+(\w+)\.(\w+)') # 2 groups, schema and name of all tables right after a JOIN keyword
 
@@ -39,16 +39,17 @@ def get_metadata(itemid):
         #Get host, database and queries from the .m script
         variables = dict(get_variables.findall(file))
         db2_sources = get_sources.findall(file)
-
         #build a list of dicts, each element is a dict with host, database and executed query(some roports have multiple queries)
         fields = ['query_host', 'query_database', 'query_content']
         metadata = [dict(zip(fields, source)) for source in db2_sources]
 
-        #change the variables aliases to the real variables values
         for vars in metadata:
-            vars.update({'query_host':variables.get(vars.get('query_host'))})
-            vars.update({'query_database':variables.get(vars.get('query_database'))})
             vars.update({'query_reportid':itemid})
+            #change the variables aliases, if any, to the real variables values
+            if len(variables)>0:
+                vars.update({'query_host':variables.get(vars.get('query_host'))})
+                vars.update({'query_database':variables.get(vars.get('query_database'))})
+
         return metadata
     else:
         return None
@@ -104,3 +105,8 @@ def parse_query(sql_str):
     tables = set([i[0] for i in tables if '.' in i[0]])
     return columns,tables,tokens
 # FIXME: the method above doesn't work when the last token is a unaliased table
+
+
+#has_db2_sources(itemid)
+#itemid = '5821EFA7-BFEB-4082-B57D-8313B170E03E'
+#get_metadata(itemid)
